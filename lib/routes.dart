@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yecard/screens/app/home_screen.dart';
 import 'package:yecard/screens/home_sccreen.dart';
 import 'package:yecard/screens/login_screen.dart';
 import 'package:yecard/screens/signup_create_password.dart';
@@ -12,6 +13,7 @@ class AppRoutes {
   static const String login = '/login';
   static const String signup = '/signup';
   static const String create_password = '/create_password';
+  static const String app_home = '/app/home';
 
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -26,6 +28,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => SignupScreen());
       case create_password:
         return MaterialPageRoute(builder: (_) => CreatePasswordScreen());
+      case app_home:
+        return MaterialPageRoute(builder: (_) => HomePage());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

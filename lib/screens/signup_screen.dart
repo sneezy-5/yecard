@@ -43,7 +43,6 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // title: Text('Créer un compte'),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.green,

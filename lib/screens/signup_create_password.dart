@@ -120,7 +120,8 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                           content: 'Votre mot de passe a été créé avec succès.',
                           buttonText: '',
                           onButtonPressed: () {
-                            Navigator.of(context).pop(); // Fermer le popup
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pushNamed('/app/home');
                           },
                         );
                       },

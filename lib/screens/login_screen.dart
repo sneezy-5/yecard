@@ -33,7 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
               TextField(
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30.0),
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
                   hintText: 'Identifiant',
                   prefixIcon: Padding(
@@ -53,13 +53,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30.0),
+                    borderRadius: BorderRadius.circular(10.0),
                   ),
                   hintText: 'Mot de passe',
                   prefixIcon: Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Image.asset(
-                      'assets/icons/lock.png',  // Remplacez par votre icône de mot de passe
+                      'assets/icons/lock.png',
                       width: 20,
                       height: 20,
                     ),
