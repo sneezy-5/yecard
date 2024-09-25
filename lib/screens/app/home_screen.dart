@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:yecard/screens/app/screens/card_screen.dart';
+import 'package:yecard/screens/app/screens/code_qr_screen.dart';
+import 'package:yecard/screens/app/screens/contacts_screen.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -11,9 +13,8 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = [
     CardScreen(),
-    // Center(child: Text('Cartes', style: TextStyle(fontSize: 24))),
-    Center(child: Text('Contacts', style: TextStyle(fontSize: 24))),
-    Center(child: Text('Code Qr', style: TextStyle(fontSize: 24))),
+    ContactsScreen(),
+    QrCodeScannerScreen()
   ];
 
   void _onItemTapped(int index) {
@@ -25,50 +26,45 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: _pages[_selectedIndex],
-
-
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/images/button_card.png',
-              width: 50,
-              height: 60,
-            ),
-            label: '',
+            // icon: Image.asset(
+            //   'assets/images/button_card.png',
+            //   width: 50,
+            //   height: 20,
+            // ),
+            icon: Icon(Icons.credit_card_outlined),
+            label: 'Card',
           ),
-           BottomNavigationBarItem(
-            icon:Image.asset(
-              'assets/images/button_person.png',
-              width: 50,
-              height: 60,
-            ),
-            label: '',
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person_2_outlined),
+            // icon: Image.asset(
+            //   'assets/images/button_person.png',
+            //   width: 50,
+            //   height: 20,
+            // ),
+            label: 'Contacts',
           ),
-           BottomNavigationBarItem(
-            icon: Image.asset(
-              'assets/images/buttom_qr.png',
-              width: 50,
-              height: 60,
-            ),
-            label: '',
+          BottomNavigationBarItem(
+            // icon: Image.asset(
+            //   'assets/images/buttom_qr.png',
+            //   width: 50,
+            //   height: 20,
+            // ),
+            icon: Icon(Icons.qr_code),
+            label: 'QR Code',
           ),
         ],
-        currentIndex: _selectedIndex, // Indicate the selected tab
-        selectedItemColor: Colors.green, // Color for the selected item
-        onTap: _onItemTapped, // Function to handle taps
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
       ),
     );
   }
 }
-
-void main() {
-  runApp(MaterialApp(
-    home: HomePage(),
-  ));
-}
-
-
 

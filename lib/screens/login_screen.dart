@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../routes.dart';
+
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -112,7 +114,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 GestureDetector(
                   onTap: () {
-                    Navigator.of(context).pushNamed('/signup');
+                    AppRoutes.pushReplacement(context, AppRoutes.signup);
                   },
                   child: const Text(
                     "Créer un compte",
@@ -130,13 +132,14 @@ class _LoginScreenState extends State<LoginScreen> {
               Center(
                 child: ElevatedButton(
                   onPressed: () {
-                    // Action de connexion
+                    AppRoutes.pushReplacement(context, AppRoutes.appHome);
+
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   ),
-                  child: Text('Se connecter',style: TextStyle(
+                  child: const Text('Se connecter',style: TextStyle(
                     fontSize: 12,
                     color: Colors.white
                   ),

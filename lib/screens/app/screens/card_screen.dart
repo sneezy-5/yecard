@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../routes.dart';
+
 class CardScreen extends StatefulWidget {
   @override
   _CardScreenState createState() => _CardScreenState();
@@ -116,26 +118,32 @@ class _CardScreenState extends State<CardScreen> {
               ),
             ),
             Card(
-              elevation: 4.0, // Ajout d'une ombre à la carte
+              // elevation: 1.0,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16.0), // Bordures arrondies
+                borderRadius: BorderRadius.circular(16.0),
               ),
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Image.asset(
-                  'assets/images/profile.png',
-                  width: 248,
-                  height: 351,
+                child:   GestureDetector(
+                  onTap: () {
+                    AppRoutes.pushReplacement(context, AppRoutes.appProfile);
+
+                  },
+                  child: Image.asset(
+                    'assets/images/profile.png',
+                    width: 248,
+                    height: 351,
+                  ),
                 ),
               ),
             ),
             SizedBox(height: 30),
             SizedBox(
-              width: 293, // Largeur du bouton
-              height: 56, // Hauteur du bouton
+              width: 293,
+              height: 56,
               child: ElevatedButton(
                 onPressed: () {
-                  // Action lors du clic sur le bouton
+                  AppRoutes.pushReplacement(context, AppRoutes.appGetOrder);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,

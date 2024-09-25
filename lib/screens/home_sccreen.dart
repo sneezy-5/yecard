@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../routes.dart';
+
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -20,7 +22,7 @@ class HomeScreen extends StatelessWidget {
                 ElevatedButton(
 
                   onPressed: () {
-                    Navigator.of(context).pushNamed('/signup');
+                    AppRoutes.pushReplacement(context, AppRoutes.signup);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.grey,
@@ -34,7 +36,7 @@ class HomeScreen extends StatelessWidget {
                 SizedBox(width: 20),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.of(context).pushNamed('/login');
+                    AppRoutes.pushReplacement(context, AppRoutes.login);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -53,10 +55,10 @@ class HomeScreen extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Image.asset('assets/images/nfc.png', width: 100),
+                Image.asset('assets/images/nfc.png', width: 34),
 
                 SizedBox(width: 10),
-                Image.asset('assets/images/qr.png', width: 100),
+                Image.asset('assets/images/qr.png', width: 34),
 
               ],
             )

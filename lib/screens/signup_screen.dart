@@ -1,50 +1,337 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/signup_bloc.dart';
+import '../bloc/signup_event.dart';
+import '../bloc/signup_state.dart';
+import '../models/signup_model.dart';
+import '../repositories/signup_repository.dart';
+import '../services/signup_service.dart';
+import '../widgets/text_form_field.dart';
 
-class SignupScreen extends StatefulWidget {
-  @override
-  _SignupScreenState createState() => _SignupScreenState();
-}
+class SignupScreen extends StatelessWidget {
+  final String baseUrl = 'https://yecard.pro';
 
-class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderStateMixin {
-  TabController? _tabController;
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  // TextEditingController _controller = TextEditingController(text: 'Texte par défaut sdfvsfa svasdsadds  dfvdsvasdv dcvdsavdsv dvdsvsdvds dfvdsavsdvds dvdsvdsvds sdfvsdvdv  dvdsvsvsdfa dfsddsvsdvds');
-
-  bool _haveCard = true;
-  bool _notHaveCard = false;
-
-  String? _password;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController?.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
-  void _nextTab() {
-    if (_tabController!.index < _tabController!.length - 1) {
-      _tabController!.index++;
-    }
-  }
-  void _backTab() {
-    if (_tabController!.index < _tabController!.length - 1) {
-      _tabController!.index--;
-    }
-  }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        bottom: TabBar(
-          controller: _tabController,
+    return BlocProvider(
+      create: (context) => SignupBloc(SignupRepository(SignupService())),
+      child: SignupView(),
+    );
+  }
+}
+
+class SignupView extends StatelessWidget {
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController functionController = TextEditingController();
+  final TextEditingController companyController = TextEditingController();
+  final TextEditingController bioController = TextEditingController();
+  final TextEditingController phoneController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController locationController = TextEditingController();
+  final TextEditingController cardNumberController = TextEditingController();
+  final TextEditingController conditionController = TextEditingController(text: "Accepter les conditions de confidentialité et d’utilisation...");
+
+  @override
+  Widget build(BuildContext context) {
+    return DefaultTabController(
+      length: 3, // Nombre d'étapes
+      child: Scaffold(
+        appBar: AppBar(
+          bottom: TabBarWidget(),
+        ),
+        body: BlocListener<SignupBloc, SignupState>(
+          listenWhen: (previous, current) => previous.currentStep != current.currentStep || previous.isSuccess != current.isSuccess || previous.errorMessages != current.errorMessages,
+          listener: (context, state) {
+            if (state.isSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Inscription réussie !')),
+              );
+            } else if (state.errorMessages.isNotEmpty) {
+              final errorMessage = state.errorMessages.entries
+                  .map((entry) => '${entry.key}: ${entry.value.join(', ')}')
+                  .join('\n');
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(errorMessage)),
+              );
+            } else if (state.errorMessage != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.errorMessage!)),
+              );
+            }
+
+            DefaultTabController.of(context)?.animateTo(state.currentStep - 1);
+          },
+          child: BlocBuilder<SignupBloc, SignupState>(
+            builder: (context, state) {
+              switch (state.currentStep) {
+                case 1:
+                  return _buildStepOne(context, state);
+                case 2:
+                  return _buildStepTwo(context, state);
+                case 3:
+                  return _buildStepThree(context, state);
+                default:
+                  return _buildStepOne(context, state);
+              }
+            },
+          ),
+        ),
+
+      ),
+    );
+  }
+
+  Widget _buildStepOne(BuildContext context, SignupState state) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Détail personnel',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 10),
+            CustomTextFormField(
+              hintText: 'Nom et prénom',
+              textController: nameController,
+              errorText: state.errorMessages['name']?.join(', '), // Affiche l'erreur sous le champ
+            ),
+            SizedBox(height: 10),
+            CustomTextFormField(
+              hintText: 'Fonction',
+              textController: functionController,
+              errorText: state.errorMessages['position']?.join(', '), // Erreur associée à la fonction
+            ),
+            SizedBox(height: 10),
+            CustomTextFormField(
+              hintText: 'Entreprise',
+              textController: companyController,
+              errorText: state.errorMessages['company']?.join(', '), // Erreur associée à l'entreprise
+            ),
+            SizedBox(height: 10),
+            const Text(
+              'Biographie',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 20),
+            CustomTextFormField(
+              hintText: 'Décrivez-vous',
+              maxLines: 4,
+              textController: bioController,
+              errorText: state.errorMessages['biography']?.join(', '), // Erreur associée à la biographie
+            ),
+            SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                onPressed: () {
+                  context.read<SignupBloc>().add(NextStep());
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                ),
+                child: Text('Continuer', style: TextStyle(fontSize: 16, color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepTwo(BuildContext context, SignupState state) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Column(
+              children: [
+                Text(
+                  'Contacts',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 20),
+              ],
+            ),
+            CustomTextFormField(
+              hintText: 'Numéro',
+              textController: phoneController,
+              errorText: state.errorMessages['phone']?.join(', '), // Erreur associée au numéro de téléphone
+            ),
+            SizedBox(height: 20),
+            CustomTextFormField(
+              hintText: 'Email',
+              textController: emailController,
+              errorText: state.errorMessages['email']?.join(', '), // Erreur associée à l'email
+            ),
+            SizedBox(height: 20),
+            CustomTextFormField(
+              hintText: 'Localisation',
+              textController: locationController,
+              errorText: state.errorMessages['location']?.join(', '), // Erreur associée à la localisation
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<SignupBloc>().add(BackStep());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  ),
+                  child: Text('Retour', style: TextStyle(fontSize: 16, color: Colors.white)),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<SignupBloc>().add(NextStep());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  ),
+                  child: Text('Continuer', style: TextStyle(fontSize: 16, color: Colors.white)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStepThree(BuildContext context, SignupState state) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Image.asset('assets/images/card.png', width: 168, height: 140),
+            ),
+            SizedBox(height: 20),
+            Text(
+              'Lier ma carte physique',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            Row(
+              children: [
+                Checkbox(
+                  value: context.watch<SignupBloc>().state.hasCard,
+                  onChanged: (bool? value) {
+                    context.read<SignupBloc>().add(HaveCardChanged(value ?? false));
+                  },
+                ),
+                Text("J'ai une carte physique"),
+              ],
+            ),
+            CustomTextFormField(
+              hintText: 'Insérer le numéro de la carte',
+              textController: cardNumberController,
+              errorText: state.errorMessages['cardNumber']?.join(', '), // Erreur associée au numéro de carte
+            ),
+            SizedBox(height: 10),
+            Divider(
+              color: Colors.grey,
+              thickness: 1,
+            ),
+            Row(
+              children: [
+                Checkbox(
+                  value: context.watch<SignupBloc>().state.hasCard,
+                  onChanged: (bool? value) {
+                    context.read<SignupBloc>().add(HaveCardChanged(value ?? false));
+                  },
+                ),
+                Text(
+                  "Accepter les conditions de confidentialité et d’utilisation ",
+                  style: TextStyle(fontSize: 10),
+                ),
+              ],
+            ),
+            CustomTextFormField(
+              hintText: '',
+              maxLines: 5,
+              textController: conditionController,
+              errorText: state.errorMessages['conditions']?.join(', '), // Erreur associée aux conditions
+            ),
+            SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    context.read<SignupBloc>().add(BackStep());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey,
+                    padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  ),
+                  child: Text('Retour', style: TextStyle(fontSize: 16, color: Colors.white)),
+                ),
+                ElevatedButton(
+                  onPressed: context.watch<SignupBloc>().state.isLoading
+                      ? null // Désactiver le bouton si en chargement
+                      : () {
+                    String name = nameController.text;
+                    String function = functionController.text;
+                    String company = companyController.text;
+                    String bio = bioController.text;
+                    String phone = phoneController.text;
+                    String email = emailController.text;
+                    String location = locationController.text;
+                    String cardNumber = cardNumberController.text;
+                    String conditions = conditionController.text;
+                    final signupData = SignupData(
+                      name: name,
+                      position: function,
+                      company: company,
+                      biography: bio,
+                      phone: phone,
+                      email: email,
+                      location: location,
+                      hasCard: context.read<SignupBloc>().state.hasCard,
+                      cardNumber: cardNumber,
+                      password: 'password',
+                    );
+
+                    context.read<SignupBloc>().add(SubmitSignup(signupData));
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  ),
+                  child: context.watch<SignupBloc>().state.isLoading
+                      ? CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  )
+                      : Text('Continuer', style: TextStyle(fontSize: 16, color: Colors.white)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class TabBarWidget extends StatelessWidget implements PreferredSizeWidget {
+  const TabBarWidget({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<SignupBloc, SignupState>(
+      builder: (context, state) {
+        return const TabBar(
           indicatorColor: Colors.green,
           labelColor: Colors.green,
           unselectedLabelColor: Colors.grey,
@@ -53,540 +340,11 @@ class _SignupScreenState extends State<SignupScreen> with SingleTickerProviderSt
             Tab(text: 'Niveau 2'),
             Tab(text: 'Niveau 3'),
           ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildStepOne(),
-          _buildStepTwo(),
-          _buildStepThree(),
-        ],
-      ),
-
+        );
+      },
     );
   }
 
-  Widget _buildStepOne() {
-    return Padding(
-    padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-
-            'Detail personnel',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 20),
-
-          TextFormField(
-            decoration: InputDecoration(
-              filled: true,  // Assure que le fond est rempli
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.0),
-
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              hintText: 'Nom et prenom',
-              hintStyle: TextStyle(color: Colors.grey),
-
-            ),
-          ),
-          SizedBox(height: 20),
-          TextFormField(
-            decoration: InputDecoration(
-              filled: true,  // Assure que le fond est rempli
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.0),
-
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              hintText: 'Fonction',
-              hintStyle: TextStyle(color: Colors.grey),
-
-            ),
-          ),
-          SizedBox(height: 20),
-
-          TextFormField(
-            decoration: InputDecoration(
-              filled: true,  // Assure que le fond est rempli
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.0),
-
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              hintText: 'Entreprise',
-              hintStyle: TextStyle(color: Colors.grey),
-
-            ),
-          ),
-          SizedBox(height: 20),
-          Text(
-            'Biographie',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 20),
-
-          TextFormField(
-            maxLines: 5, // Permet plusieurs lignes
-            decoration: InputDecoration(
-              filled: true,  // Assure que le fond est rempli
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.0),
-
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              hintText: 'Decrivez-vous',
-              hintStyle: TextStyle(color: Colors.grey),
-              // prefixIcon: Padding(
-              //   padding: const EdgeInsets.all(10.0),
-              //   child: Icon(Icons.edit, color: Colors.grey),
-              // ),
-            ),
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Veuillez entrer une bio';
-              }
-              return null;
-            },
-          ),
-      Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  "Vous n'avez pas de compte?",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).pushNamed('/login');
-                  },
-                  child: const Text(
-                    "Se connecter",
-                    style: TextStyle(
-                      color: Colors.green,
-                      // fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-
-              ],
-            ),
-
-          SizedBox(height: 20),
-          Center(
-            child: ElevatedButton(
-              onPressed: _nextTab,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-              ),
-              child: Text('Continuer',
-
-                style: TextStyle(
-                fontSize: 16,
-
-                  color: Colors.white
-              ), ),
-            ),
-          ),
-        ],
-
-      )
-    );
-  }
-
-  Widget _buildStepTwo() {
-    return Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-
-                  'Contacts',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 20),
-
-                TextFormField(
-
-                  decoration: InputDecoration(
-                    filled: true,  // Assure que le fond est rempli
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6.0),
-
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white, width: 1.5),
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white, width: 1.5),
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    hintText: 'Numero',
-                    hintStyle: TextStyle(color: Colors.grey),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Icon(Icons.phone, color: Colors.grey),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer une numero';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 20),
-                TextFormField(
-                  decoration: InputDecoration(
-
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    filled: true,  // Assure que le fond est rempli
-                    fillColor: Colors.white,
-
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white, width: 1.5),
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white, width: 1.5),
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    hintText: 'Email',
-                    hintStyle: TextStyle(color: Colors.grey),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Icon(Icons.email, color: Colors.grey),
-                    ),
-
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer un email';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 20),
-
-                TextFormField(
-                  decoration: InputDecoration(
-                    filled: true,  // Assure que le fond est rempli
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(6.0),
-
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white, width: 1.5),
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white, width: 1.5),
-                      borderRadius: BorderRadius.circular(6.0),
-                    ),
-                    hintText: 'Localisation',
-                    hintStyle: TextStyle(color: Colors.grey),
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Icon(Icons.gps_fixed, color: Colors.grey),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer une localisation';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 20),
-              ],
-            ),
-
-          Column(
-            children: [
-
-                  Text(
-                    "Vous n'avez pas de compte?",
-                    style: TextStyle(
-                      color: Colors.black,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushNamed('/login');
-                    },
-                    child: const Text(
-                      "Se connecter",
-                      style: TextStyle(
-                        color: Colors.green,
-                        // fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-
-
-
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: _backTab,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                    ),
-                    child: Text('Retour',
-
-                      style: TextStyle(
-                          fontSize: 16,
-
-                          color: Colors.white
-                      ), ),
-                  ),
-
-                  ElevatedButton(
-                    onPressed: _nextTab,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                    ),
-                    child: Text('Continuer',
-
-                      style: TextStyle(
-                          fontSize: 16,
-
-                          color: Colors.white
-                      ), ),
-                  ),
-                ],
-              ),
-
-            ],
-          )
-
-
-
-          ],
-
-        )
-    );
-  }
-
-  Widget _buildStepThree() {
-    return Padding(
-      padding: const EdgeInsets.all(20.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(
-            child:
-                Image.asset('assets/images/card.png', width: 168,height: 140,),
-
-          ),
-
-          Text(
-            'Lier ma carte physique',
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 20),
-          Row(
-            children: [
-              Checkbox(
-                value: _haveCard,  // État de la checkbox
-                onChanged: (bool? value) {  // Gérer l'état de la checkbox
-                  setState(() {
-                    _haveCard = value ?? false;
-                  });
-                },
-              ),
-              Text("J'ai une carte physique"),
-            ],
-          ),
-          TextFormField(
-            decoration: InputDecoration(
-              filled: true,  // Assure que le fond est rempli
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.0),
-
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              hintText: 'Inserer le numero de la carte',
-              hintStyle: TextStyle(color: Colors.grey),
-
-            ),
-          ),
-          Row(
-            children: [
-              Checkbox(
-                value: _notHaveCard,  // État de la checkbox
-                onChanged: (bool? value) {  // Gérer l'état de la checkbox
-                  setState(() {
-                    _notHaveCard = value ?? false;
-                  });
-                },
-              ),
-              Text("Je n'ai pas de carte physique"),
-            ],
-          ),
-          Divider(
-            color: Colors.grey,  // Couleur du trait
-            thickness: 1,        // Épaisseur du trait
-          ),
-          SizedBox(height: 20),
-
-          Row(
-            children: [
-              Checkbox(
-                value: _haveCard,  // État de la checkbox
-                onChanged: (bool? value) {  // Gérer l'état de la checkbox
-                  setState(() {
-                    _haveCard = value ?? false;
-                  });
-                },
-              ),
-              Text("Accepter les condition de confidentialité et d’utilisation ", style: TextStyle(
-                fontSize: 12,
-              ),
-              ),
-            ],
-          ),
-          TextFormField(
-            maxLines: 5,
-
-            initialValue: 'Accepter les conditions de confidentialité et d’utilisation wefaewfsdf sdfgsdggsdagsdg g grwgwg gw gwr gweg wg wg  g g g wgwrgrgggrwwegweg',  // Texte par défaut
-            decoration: InputDecoration(
-              enabled: false,
-              filled: true,
-              fillColor: Colors.white,  // Couleur de fond blanche
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.0),
-
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: Colors.white, width: 1.5),
-                borderRadius: BorderRadius.circular(6.0),
-              ),
-              hintStyle: TextStyle(color: Colors.grey),
-            ),
-            style: TextStyle(color: Colors.black),  // Style du texte affiché
-          ),
-          SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: _backTab,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                ),
-                child: Text('Retour',
-
-                  style: TextStyle(
-                      fontSize: 16,
-
-                      color: Colors.white
-                  ), ),
-              ),
-
-              ElevatedButton(
-                onPressed: ()=>{
-                Navigator.of(context).pushNamed('/create_password')
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                ),
-                child: Text('Continuer',
-
-                  style: TextStyle(
-                      fontSize: 16,
-
-                      color: Colors.white
-                  ), ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+  @override
+  Size get preferredSize => Size.fromHeight(kToolbarHeight);
 }
