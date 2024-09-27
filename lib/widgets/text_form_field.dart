@@ -5,6 +5,8 @@ class CustomTextFormField extends StatelessWidget {
   final String hintText;
   final TextEditingController textController;
   final String? errorText;
+  final bool readOnly;
+
 
   const CustomTextFormField({
     super.key,
@@ -12,6 +14,7 @@ class CustomTextFormField extends StatelessWidget {
     required this.textController,
     this.maxLines = 1,
     this.errorText,
+    this.readOnly =false,
   });
 
   @override
@@ -19,6 +22,7 @@ class CustomTextFormField extends StatelessWidget {
     return TextFormField(
       controller: textController,
       maxLines: maxLines,
+      readOnly: readOnly,
       decoration: InputDecoration(
         errorText: errorText,
         filled: true,

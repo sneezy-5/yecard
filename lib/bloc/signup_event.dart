@@ -20,6 +20,14 @@ class HaveCardChanged extends SignupEvent {
   List<Object> get props => [hasCard];
 }
 
+class HaveConditionChanged extends SignupEvent {
+  final bool condition;
+
+  HaveConditionChanged(this.condition);
+
+  @override
+  List<Object> get props => [condition];
+}
 class SubmitSignup extends SignupEvent {
   final SignupData signupData;
 

@@ -5,27 +5,29 @@ part 'signup_model.g.dart';
 @JsonSerializable()
 class SignupData {
   final String name;
-  final String position;
-  final String company;
-  final String biography;
+  final String fonction;
+  final String entreprise;
+  final String biographie;
   final String phone;
   final String email;
-  final String location;
+  final String localisation;
   final bool hasCard;
   final String cardNumber;
   final String password;
+  final String username;
 
   SignupData({
     required this.name,
-    required this.position,
-    required this.company,
-    required this.biography,
+    required this.fonction,
+    required this.entreprise,
+    required this.biographie,
     required this.phone,
     required this.email,
-    required this.location,
+    required this.localisation,
     required this.hasCard,
     required this.cardNumber,
     required this.password,
+    required this.username
 
   });
 

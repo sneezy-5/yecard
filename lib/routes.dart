@@ -39,9 +39,7 @@ class AppRoutes {
       case signup:
         return MaterialPageRoute(builder: (_) => SignupScreen());
       case createPassword:
-        return MaterialPageRoute(builder: (_) => BlocProvider(
-    create: (_) => PasswordBloc(),
-    child: CreatePasswordScreen()));
+        return MaterialPageRoute(builder: (_) =>CreatePasswordScreen());
       case appHome:
         return MaterialPageRoute(builder: (_) => HomePage());
       case appProfile:

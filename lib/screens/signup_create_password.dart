@@ -3,17 +3,99 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/password_bloc.dart';
 import '../bloc/password_event.dart';
 import '../bloc/password_state.dart';
-import '../bloc/signup_bloc.dart';
-import '../bloc/signup_event.dart';
+import '../models/password_reset.dart';
+import '../repositories/reset_password_repository.dart';
 import '../routes.dart';
+import '../services/reset_password.dart';
+import '../services/user_preference.dart';
 import '../widgets/popup_widgets.dart';
 
+// class CreatePasswordScreen extends StatelessWidget {
+//
+//
+//   @override
+//   Widget build(BuildContext context) {
+//
+//     final Map<String, String> userInfo = UserPreferences.getUserInfo() as Map<String, String>;
+//
+//     // Validate the user ID
+//     final userId = int.tryParse(userInfo['id'] ?? '');
+//
+//     if (userId == null) {
+//       return Scaffold(
+//         body: Center(
+//           child: Text("ID utilisateur invalide"),
+//         ),
+//       );
+//     }
+//
+//     return BlocProvider(
+//       create: (context) => PasswordBloc(PasswordResetRepository(ResetService(),userId)),
+//       child: CreatePasswordWiev(),
+//     );
+//   }
+// }
+
 class CreatePasswordScreen extends StatefulWidget {
+  const CreatePasswordScreen({Key? key}) : super(key: key);
+
   @override
   _CreatePasswordScreenState createState() => _CreatePasswordScreenState();
 }
 
 class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
+  String? token;
+  Map<String, String>? userInfo;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+  }
+
+  Future<void> _loadUserInfo() async {
+    token = await UserPreferences.getUserToken();
+    userInfo = await UserPreferences.getUserInfo();
+
+    if (mounted) {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    final userId = int.tryParse(userInfo?['id'] ?? '');
+
+    if (userId == null) {
+      print(userInfo);
+      return Scaffold(
+        body: Center(
+          child: Text("ID utilisateur invalide"),
+        ),
+      );
+    }
+
+    return BlocProvider(
+      create: (context) => PasswordBloc(
+        PasswordResetRepository(ResetService(), userId),
+      ),
+      child: CreatePasswordWiev(),
+    );
+  }
+}
+
+class CreatePasswordWiev extends StatelessWidget {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
@@ -24,17 +106,16 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
-          child: BlocProvider(
-            create: (_) => PasswordBloc(),
             child: BlocConsumer<PasswordBloc, PasswordState>(
               listener: (context, state) {
-                if (state.isPasswordCreated) {
+                if (state.isSuccess) {
+                  print("TESTETSTETSTETXTE");
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
                       return CustomPopup(
                         title: 'Succès',
-                        content: "Votre carte numéroté 123 456 789 123 à été lier a votre compte avec succès vous pouvez bénéficier de tous les avantage de notre service.",
+                        content: "Votre mot de passe a ete cree avec succes",
                         buttonText: 'ok',
                         onButtonPressed: () {
                           Navigator.of(context).pop();
@@ -43,9 +124,12 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                       );
                     },
                   );
-                } else if (state.errorMessage.isNotEmpty) {
+                } else if (state.errorMessages.isNotEmpty) {
+                  final errorMessage = state.errorMessages.entries
+                      .map((entry) => '${entry.key}: ${entry.value.join(', ')}')
+                      .join('\n');
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(state.errorMessage)),
+                    SnackBar(content: Text(errorMessage)),
                   );
                 }
               },
@@ -68,6 +152,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                       controller: _passwordController,
                       obscureText: state.obscurePassword,
                       decoration: InputDecoration(
+                        errorText: state.errorMessage,
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -93,6 +178,7 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                       controller: _confirmPasswordController,
                       obscureText: state.obscureConfirmPassword,
                       decoration: InputDecoration(
+                        errorText: state.errorMessage,
                         filled: true,
                         fillColor: Colors.white,
                         border: OutlineInputBorder(
@@ -115,35 +201,35 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
 
                     // Bouton "Créer"
                     Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children:[
-                          ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.grey,
-                              padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                            ),
-                            child: Text('Retour', style: TextStyle(fontSize: 16, color: Colors.white)),
-                          ),
+
                         ElevatedButton(
-                          onPressed: () {
+                          onPressed: context.watch<PasswordBloc>().state.isLoading
+                ? null
+                    : () {
+
+                            final passwordData = PasswordResetData(
+                              newpassword: _passwordController.text,
+                              confirmPassword: _confirmPasswordController.text,
+
+                            );
+
                             context.read<PasswordBloc>().add(
-                              CreatePassword(
-                                _passwordController.text,
-                                _confirmPasswordController.text,
-                              ),
+                                SubmitResetPassword(passwordData)
                             );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.green,
                             padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                           ),
-                          child: Text(
-                            'Créer',
-                            style: TextStyle(fontSize: 12, color: Colors.white),
-                          ),
-                        ),
+                          child:  context.watch<PasswordBloc>().state.isLoading
+                ? CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                )
+                    : Text('Creer', style: TextStyle(fontSize: 16, color: Colors.white)),
+                ),
+
                 ]
 
                     ),
@@ -151,7 +237,6 @@ class _CreatePasswordScreenState extends State<CreatePasswordScreen> {
                 );
               },
             ),
-          ),
         ),
       ),
     );

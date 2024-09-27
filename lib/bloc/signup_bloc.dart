@@ -10,6 +10,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     on<NextStep>(_onNextStep);
     on<BackStep>(_onBackStep);
     on<HaveCardChanged>(_onHaveCardChanged);
+    on<HaveConditionChanged>(_hveConditionChanged);
     on<SubmitSignup>(_onSubmitSignup);
   }
 
@@ -29,6 +30,9 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     emit(state.copyWith(hasCard: event.hasCard));
   }
 
+  void _hveConditionChanged(HaveConditionChanged event, Emitter<SignupState> emit) {
+    emit(state.copyWith(condition: event.condition));
+  }
   void _onSubmitSignup(SubmitSignup event, Emitter<SignupState> emit) async {
     print("Début de la soumission du formulaire");
 

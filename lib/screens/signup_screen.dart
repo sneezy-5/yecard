@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yecard/models/login_model.dart';
+import 'package:yecard/services/login_service.dart';
 import '../bloc/signup_bloc.dart';
 import '../bloc/signup_event.dart';
 import '../bloc/signup_state.dart';
 import '../models/signup_model.dart';
+import '../repositories/login_repository.dart';
 import '../repositories/signup_repository.dart';
+import '../routes.dart';
 import '../services/signup_service.dart';
+import '../widgets/popup_widgets.dart';
 import '../widgets/text_form_field.dart';
 
 class SignupScreen extends StatelessWidget {
-  final String baseUrl = 'https://yecard.pro';
+
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +26,7 @@ class SignupScreen extends StatelessWidget {
 }
 
 class SignupView extends StatelessWidget {
+  final LoginRepository loginRepository = LoginRepository(LoginService());
   final TextEditingController nameController = TextEditingController();
   final TextEditingController functionController = TextEditingController();
   final TextEditingController companyController = TextEditingController();
@@ -43,8 +49,22 @@ class SignupView extends StatelessWidget {
           listenWhen: (previous, current) => previous.currentStep != current.currentStep || previous.isSuccess != current.isSuccess || previous.errorMessages != current.errorMessages,
           listener: (context, state) {
             if (state.isSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Inscription réussie !')),
+              final loginData = LoginModelData(email: emailController.text, password: "password");
+              loginRepository.login(loginData);
+              print("TEST TEST TEST");
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return CustomPopup(
+                    title: 'Succès',
+                    content: "Votre carte numéroté 123 456 789 123 à été lier a votre compte avec succès vous pouvez bénéficier de tous les avantage de notre service.",
+                    buttonText: 'ok',
+                    onButtonPressed: () {
+                      Navigator.of(context).pop();
+                      AppRoutes.pushReplacement(context, AppRoutes.createPassword);
+                    },
+                  );
+                },
               );
             } else if (state.errorMessages.isNotEmpty) {
               final errorMessage = state.errorMessages.entries
@@ -97,19 +117,19 @@ class SignupView extends StatelessWidget {
             CustomTextFormField(
               hintText: 'Nom et prénom',
               textController: nameController,
-              errorText: state.errorMessages['name']?.join(', '), // Affiche l'erreur sous le champ
+              errorText: state.errorMessages['name']?.join(', '),
             ),
             SizedBox(height: 10),
             CustomTextFormField(
               hintText: 'Fonction',
               textController: functionController,
-              errorText: state.errorMessages['position']?.join(', '), // Erreur associée à la fonction
+              errorText: state.errorMessages['fonction']?.join(', '), // Erreur associée à la fonction
             ),
             SizedBox(height: 10),
             CustomTextFormField(
               hintText: 'Entreprise',
               textController: companyController,
-              errorText: state.errorMessages['company']?.join(', '), // Erreur associée à l'entreprise
+              errorText: state.errorMessages['entreprise']?.join(', '), // Erreur associée à l'entreprise
             ),
             SizedBox(height: 10),
             const Text(
@@ -161,19 +181,19 @@ class SignupView extends StatelessWidget {
             CustomTextFormField(
               hintText: 'Numéro',
               textController: phoneController,
-              errorText: state.errorMessages['phone']?.join(', '), // Erreur associée au numéro de téléphone
+              errorText: state.errorMessages['phone']?.join(', '),
             ),
             SizedBox(height: 20),
             CustomTextFormField(
               hintText: 'Email',
               textController: emailController,
-              errorText: state.errorMessages['email']?.join(', '), // Erreur associée à l'email
+              errorText: state.errorMessages['email']?.join(', '),
             ),
             SizedBox(height: 20),
             CustomTextFormField(
               hintText: 'Localisation',
               textController: locationController,
-              errorText: state.errorMessages['location']?.join(', '), // Erreur associée à la localisation
+              errorText: state.errorMessages['localisation']?.join(', '),
             ),
             SizedBox(height: 20),
             Row(
@@ -207,7 +227,11 @@ class SignupView extends StatelessWidget {
     );
   }
 
+
   Widget _buildStepThree(BuildContext context, SignupState state) {
+    final hasCard = context.watch<SignupBloc>().state.hasCard;
+    final condition = context.watch<SignupBloc>().state.condition;
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -225,7 +249,7 @@ class SignupView extends StatelessWidget {
             Row(
               children: [
                 Checkbox(
-                  value: context.watch<SignupBloc>().state.hasCard,
+                  value: hasCard,
                   onChanged: (bool? value) {
                     context.read<SignupBloc>().add(HaveCardChanged(value ?? false));
                   },
@@ -233,11 +257,13 @@ class SignupView extends StatelessWidget {
                 Text("J'ai une carte physique"),
               ],
             ),
-            CustomTextFormField(
-              hintText: 'Insérer le numéro de la carte',
-              textController: cardNumberController,
-              errorText: state.errorMessages['cardNumber']?.join(', '), // Erreur associée au numéro de carte
-            ),
+
+            if (hasCard)
+              CustomTextFormField(
+                hintText: 'Insérer le numéro de la carte',
+                textController: cardNumberController,
+                errorText: state.errorMessages['cardNumber']?.join(', '),
+              ),
             SizedBox(height: 10),
             Divider(
               color: Colors.grey,
@@ -246,9 +272,9 @@ class SignupView extends StatelessWidget {
             Row(
               children: [
                 Checkbox(
-                  value: context.watch<SignupBloc>().state.hasCard,
+                  value: condition,
                   onChanged: (bool? value) {
-                    context.read<SignupBloc>().add(HaveCardChanged(value ?? false));
+                    context.read<SignupBloc>().add(HaveConditionChanged(value ?? false));
                   },
                 ),
                 Text(
@@ -257,11 +283,13 @@ class SignupView extends StatelessWidget {
                 ),
               ],
             ),
+            // Affiche le champ conditions
             CustomTextFormField(
               hintText: '',
               maxLines: 5,
               textController: conditionController,
-              errorText: state.errorMessages['conditions']?.join(', '), // Erreur associée aux conditions
+              readOnly: true,
+              errorText: state.errorMessages['conditions']?.join(', '),
             ),
             SizedBox(height: 8),
             Row(
@@ -278,8 +306,8 @@ class SignupView extends StatelessWidget {
                   child: Text('Retour', style: TextStyle(fontSize: 16, color: Colors.white)),
                 ),
                 ElevatedButton(
-                  onPressed: context.watch<SignupBloc>().state.isLoading
-                      ? null // Désactiver le bouton si en chargement
+                  onPressed: !condition || context.watch<SignupBloc>().state.isLoading
+                      ? null // Désactiver le bouton si les conditions ne sont pas acceptées ou si en chargement
                       : () {
                     String name = nameController.text;
                     String function = functionController.text;
@@ -289,21 +317,27 @@ class SignupView extends StatelessWidget {
                     String email = emailController.text;
                     String location = locationController.text;
                     String cardNumber = cardNumberController.text;
-                    String conditions = conditionController.text;
+
                     final signupData = SignupData(
                       name: name,
-                      position: function,
-                      company: company,
-                      biography: bio,
+                      fonction: function,
+                      entreprise: company,
+                      biographie: bio,
                       phone: phone,
                       email: email,
-                      location: location,
-                      hasCard: context.read<SignupBloc>().state.hasCard,
+                      localisation: location,
+                      hasCard: hasCard,
                       cardNumber: cardNumber,
                       password: 'password',
+                      username: name + function,
                     );
 
                     context.read<SignupBloc>().add(SubmitSignup(signupData));
+
+                    // login state
+                    final loginData = LoginModelData(email: email, password: "password");
+                    loginRepository.login(loginData) ;
+
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -322,6 +356,7 @@ class SignupView extends StatelessWidget {
       ),
     );
   }
+
 }
 
 class TabBarWidget extends StatelessWidget implements PreferredSizeWidget {
