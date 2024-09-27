@@ -41,7 +41,7 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     try {
       final result = await _signupRepository.signup(event.signupData);
       if (result['success']) {
-        emit(state.copyWith(isLoading: false, isSuccess: true));
+        emit(state.copyWith(isLoading: false, isSuccess: true,errorMessage:"",errorMessages:{}));
       } else {
         print("Réponse de l'API : $result");
 

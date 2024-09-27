@@ -51,7 +51,6 @@ class SignupView extends StatelessWidget {
             if (state.isSuccess) {
               final loginData = LoginModelData(email: emailController.text, password: "password");
               loginRepository.login(loginData);
-              print("TEST TEST TEST");
               showDialog(
                 context: context,
                 builder: (BuildContext context) {

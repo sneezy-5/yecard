@@ -41,13 +41,14 @@ class PasswordBloc extends Bloc<PasswordEvent, PasswordState> {
 
         if (result['success']) {
           print("HERE.... ");
-          emit(state.copyWith(isLoading: false, isSuccess: true));
+          emit(state.copyWith(isLoading: false, isSuccess: true,errorMessage:"",errorMessages:{}));
         } else {
           print("Réponse de l'API : $result");
 
           emit(state.copyWith(
             isLoading: false,
             errorMessages: result['errors'] ?? {},
+              errorMessage: result['errors']
           ));
         }
       }

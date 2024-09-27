@@ -32,13 +32,20 @@ class LoginService {
           'success': true,
           'message': "login sucess",
         };
-      } else {
+      }
+      if (response.statusCode == 401) {
+        print("Réponse réussie : ${response.body}");
+        return {
+          'success': false,
+          'error': "No active account found with the given credentials",
+        };
+      }else {
         print("Échec de login : ${response.body}");
         final responseBody = jsonDecode(response.body);
 
         return {
           'success': false,
-          'errors': (responseBody['data'] as Map<dynamic, dynamic>)?.map(
+          'errors': (responseBody as Map<dynamic, dynamic>)?.map(
                 (key, value) => MapEntry(
               key.toString(),
               List<String>.from(value),

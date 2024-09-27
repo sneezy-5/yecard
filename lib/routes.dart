@@ -6,13 +6,12 @@ import 'package:yecard/screens/app/screens/add_portfolio.dart';
 import 'package:yecard/screens/app/screens/card_order.dart';
 import 'package:yecard/screens/app/screens/portfolio_details.dart';
 import 'package:yecard/screens/app/screens/profile_screen.dart';
-import 'package:yecard/screens/home_sccreen.dart';  // Correction de `home_sccreen.dart`
+import 'package:yecard/screens/home_sccreen.dart';
 import 'package:yecard/screens/login_screen.dart';
 import 'package:yecard/screens/signup_create_password.dart';
 import 'package:yecard/screens/signup_screen.dart';
 import 'package:yecard/services/delivery_service.dart';
 import 'bloc/delivery_bloc.dart';
-import 'bloc/password_bloc.dart';
 import 'screens/splash_screen.dart';
 
 class AppRoutes {

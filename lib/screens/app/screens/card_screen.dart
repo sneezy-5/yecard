@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../routes.dart';
+import '../../../services/user_preference.dart';
 
 class CardScreen extends StatefulWidget {
   @override
@@ -9,6 +10,13 @@ class CardScreen extends StatefulWidget {
 
 class _CardScreenState extends State<CardScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+
+  Future<void> _removeUserInfo() async {
+     await UserPreferences.clearUserToken();
+     AppRoutes.pushReplacement(context, AppRoutes.login);
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +91,9 @@ class _CardScreenState extends State<CardScreen> {
               ),
               title: Text('Quitter l’application'),
               onTap: () {
-                Navigator.pop(context);
+                // Navigator.pop(context);
+                print("TESTETSTETSTE");
+                _removeUserInfo();
               },
             ),
           ],

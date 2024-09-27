@@ -10,31 +10,6 @@ import '../services/reset_password.dart';
 import '../services/user_preference.dart';
 import '../widgets/popup_widgets.dart';
 
-// class CreatePasswordScreen extends StatelessWidget {
-//
-//
-//   @override
-//   Widget build(BuildContext context) {
-//
-//     final Map<String, String> userInfo = UserPreferences.getUserInfo() as Map<String, String>;
-//
-//     // Validate the user ID
-//     final userId = int.tryParse(userInfo['id'] ?? '');
-//
-//     if (userId == null) {
-//       return Scaffold(
-//         body: Center(
-//           child: Text("ID utilisateur invalide"),
-//         ),
-//       );
-//     }
-//
-//     return BlocProvider(
-//       create: (context) => PasswordBloc(PasswordResetRepository(ResetService(),userId)),
-//       child: CreatePasswordWiev(),
-//     );
-//   }
-// }
 
 class CreatePasswordScreen extends StatefulWidget {
   const CreatePasswordScreen({Key? key}) : super(key: key);
@@ -109,7 +84,6 @@ class CreatePasswordWiev extends StatelessWidget {
             child: BlocConsumer<PasswordBloc, PasswordState>(
               listener: (context, state) {
                 if (state.isSuccess) {
-                  print("TESTETSTETSTETXTE");
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
@@ -134,107 +108,110 @@ class CreatePasswordWiev extends StatelessWidget {
                 }
               },
               builder: (context, state) {
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Créer un mot de passe',
-                      style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 30),
-
-                    // Champ de saisie du mot de passe
-                    TextFormField(
-                      controller: _passwordController,
-                      obscureText: state.obscurePassword,
-                      decoration: InputDecoration(
-                        errorText: state.errorMessage,
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6.0),
-                        ),
-                        prefixIcon: Icon(Icons.lock),
-                        hintText: 'Créer un mot de passe',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            state.obscurePassword ? Icons.visibility : Icons.visibility_off,
-                          ),
-                          onPressed: () {
-                            context.read<PasswordBloc>().add(TogglePasswordVisibility());
-                          },
+                return SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Créer un mot de passe',
+                        style: TextStyle(
+                          fontSize: 30,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                    ),
-                    SizedBox(height: 20),
+                      SizedBox(height: 30),
 
-                    // Champ de saisie pour la confirmation du mot de passe
-                    TextFormField(
-                      controller: _confirmPasswordController,
-                      obscureText: state.obscureConfirmPassword,
-                      decoration: InputDecoration(
-                        errorText: state.errorMessage,
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(6.0),
-                        ),
-                        prefixIcon: Icon(Icons.lock),
-                        hintText: 'Confirmation du mot de passe',
-                        hintStyle: TextStyle(color: Colors.grey),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            state.obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                      // Champ de saisie du mot de passe
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: state.obscurePassword,
+                        decoration: InputDecoration(
+                          errorText: state.errorMessage,
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6.0),
                           ),
-                          onPressed: () {
-                            context.read<PasswordBloc>().add(ToggleConfirmPasswordVisibility());
-                          },
+                          prefixIcon: Icon(Icons.lock),
+                          hintText: 'Créer un mot de passe',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              state.obscurePassword ? Icons.visibility : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              context.read<PasswordBloc>().add(TogglePasswordVisibility());
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                    SizedBox(height: 30),
+                      SizedBox(height: 20),
 
-                    // Bouton "Créer"
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children:[
-
-                        ElevatedButton(
-                          onPressed: context.watch<PasswordBloc>().state.isLoading
-                ? null
-                    : () {
-
-                            final passwordData = PasswordResetData(
-                              newpassword: _passwordController.text,
-                              confirmPassword: _confirmPasswordController.text,
-
-                            );
-
-                            context.read<PasswordBloc>().add(
-                                SubmitResetPassword(passwordData)
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green,
-                            padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                      // Champ de saisie pour la confirmation du mot de passe
+                      TextFormField(
+                        controller: _confirmPasswordController,
+                        obscureText: state.obscureConfirmPassword,
+                        decoration: InputDecoration(
+                          errorText: state.errorMessage,
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(6.0),
                           ),
-                          child:  context.watch<PasswordBloc>().state.isLoading
-                ? CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                )
-                    : Text('Creer', style: TextStyle(fontSize: 16, color: Colors.white)),
-                ),
+                          prefixIcon: Icon(Icons.lock),
+                          hintText: 'Confirmation du mot de passe',
+                          hintStyle: TextStyle(color: Colors.grey),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              state.obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              context.read<PasswordBloc>().add(ToggleConfirmPasswordVisibility());
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 30),
 
-                ]
+                      // Bouton "Créer"
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children:[
 
-                    ),
-                  ],
+                            ElevatedButton(
+                              onPressed: context.watch<PasswordBloc>().state.isLoading
+                                  ? null
+                                  : () {
+
+                                final passwordData = PasswordResetData(
+                                  newpassword: _passwordController.text,
+                                  confirmPassword: _confirmPasswordController.text,
+
+                                );
+
+                                context.read<PasswordBloc>().add(
+                                    SubmitResetPassword(passwordData)
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.green,
+                                padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                              ),
+                              child:  context.watch<PasswordBloc>().state.isLoading
+                                  ? CircularProgressIndicator(
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              )
+                                  : Text('Creer', style: TextStyle(fontSize: 16, color: Colors.white)),
+                            ),
+
+                          ]
+
+                      ),
+                    ],
+                  )
                 );
+
               },
             ),
         ),

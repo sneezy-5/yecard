@@ -93,13 +93,13 @@ import 'package:equatable/equatable.dart';
 class LoginState extends Equatable {
   final bool isLoading;
   final bool isSuccess;
-  final String? errorMessage;
+  final String errorMessage;
   final Map<String, List<String>> errorMessages;
 
   const LoginState({
     this.isLoading = false,
     this.isSuccess = false,
-    this.errorMessage,
+    this.errorMessage = "",
     this.errorMessages = const {},
   });
 

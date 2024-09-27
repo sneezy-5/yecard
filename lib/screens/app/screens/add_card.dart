@@ -59,7 +59,7 @@ class _LinkCardScreenState extends State<LinkCardScreen> {
                 color: Colors.grey.shade100,
               ),
               child: TextField(
-                readOnly: true,  // Empêche l'entrée manuelle via le clavier natif
+                readOnly: true,
                 style: const TextStyle(fontSize: 20, letterSpacing: 2),
                 decoration: const InputDecoration(
                   hintText: 'Insérer le numéro de la carte',
@@ -71,7 +71,7 @@ class _LinkCardScreenState extends State<LinkCardScreen> {
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                // Valider l'entrée et continuer
+
                 if (cardNumber.length == 16) {
                   // Navigate to the next screen
                 }

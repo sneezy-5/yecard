@@ -30,4 +30,10 @@ class UserPreferences {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.clear();
   }
+
+  static Future<void> clearUserToken() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userToken');
+  }
+
 }
