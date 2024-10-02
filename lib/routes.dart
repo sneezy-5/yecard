@@ -42,7 +42,7 @@ class AppRoutes {
       case appHome:
         return MaterialPageRoute(builder: (_) => HomePage());
       case appProfile:
-        return MaterialPageRoute(builder: (_) => ProfileScreen());
+        return MaterialPageRoute(builder: (_) => ProfilScreen());
       case appPortfolioDetail:
         return MaterialPageRoute(builder: (_) => PortfolioDetailScreen());
       case appAddPortfolio:
