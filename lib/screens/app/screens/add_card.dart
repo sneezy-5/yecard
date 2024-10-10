@@ -1,11 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yecard/models/card_model.dart';
 
-class LinkCardScreen extends StatefulWidget {
+import '../../../bloc/link_card_bloc.dart';
+import '../../../bloc/link_card_event.dart';
+import '../../../bloc/link_card_state.dart';
+import '../../../repositories/card_repository.dart';
+import '../../../services/card_service.dart';
+import '../../../widgets/popup_widgets.dart';
+
+class LinkCardScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => LinkCardBloc(CardRepository(CardService())),
+      child: LinkCardWiev(),
+    );
+  }
+}
+class LinkCardWiev extends StatefulWidget {
   @override
   _LinkCardScreenState createState() => _LinkCardScreenState();
 }
 
-class _LinkCardScreenState extends State<LinkCardScreen> {
+class _LinkCardScreenState extends State<LinkCardWiev> {
   String cardNumber = '';
 
   void _onNumberTap(String number) {
@@ -39,60 +57,125 @@ class _LinkCardScreenState extends State<LinkCardScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            const Text(
-              'Lier ma carte',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Entrer le numéro inscrit sur la carte',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 40),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Colors.grey.shade100,
-              ),
-              child: TextField(
-                readOnly: true,
-                style: const TextStyle(fontSize: 20, letterSpacing: 2),
-                decoration: const InputDecoration(
-                  hintText: 'Insérer le numéro de la carte',
-                  border: InputBorder.none,
-                ),
-                controller: TextEditingController(text: cardNumber),
-              ),
-            ),
-            const SizedBox(height: 30),
-            ElevatedButton(
-              onPressed: () {
+        child: BlocConsumer<LinkCardBloc, LinkCardState>(
+            listener: (context, state) {
+              if (state.isSuccess) {
+              } else if (state.errorMessage.isNotEmpty) {
+                final errorMessage = state.errorMessage;
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return CustomPopup(
+                      title: 'Succès',
+                      content: "Votre carte a ete ajoute avec succes",
+                      buttonText: 'ok',
+                      onButtonPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).pushNamed('/app/home');
+                        // AppRoutes.pushReplacement(context, AppRoutes.appHome);
+                      },
+                    );
+                  },
+                );
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(errorMessage)),
+                );
+              }else if (state.errorMessages.isNotEmpty) {
+                final errorMessage = state.errorMessages.entries
+                    .map((entry) => '${entry.key}: ${entry.value.join(', ')}')
+                    .join('\n');
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(errorMessage)),
+                );
+              }
+            },
+            builder: (context, state) {
+              return         Column(
+                children: [
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Lier ma carte',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Entrer le numéro inscrit sur la carte',
+                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 40),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                      color: Colors.grey.shade100,
+                    ),
+                    child: TextField(
+                      readOnly: true,
+                      style: const TextStyle(fontSize: 20, letterSpacing: 2),
+                      decoration:  InputDecoration(
+                        errorText: state.errorMessages['number']?.join(', '),
+                        hintText: 'Insérer le numéro de la carte',
+                        border: InputBorder.none,
+                      ),
+                      controller: TextEditingController(text: cardNumber),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  // ElevatedButton(
+                  //   onPressed: () {
+                  //
+                  //     if (cardNumber.length == 16) {
+                  //       // Navigate to the next screen
+                  //     }
+                  //   },
+                  //   style: ElevatedButton.styleFrom(
+                  //     backgroundColor: Colors.green,
+                  //     padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  //     shape: RoundedRectangleBorder(
+                  //       borderRadius: BorderRadius.circular(10),
+                  //     ),
+                  //   ),
+                  //   child: const Text(
+                  //     'Continuer',
+                  //     style: TextStyle(fontSize: 18, color: Colors.white),
+                  //   ),
+                  // ),
+                  ElevatedButton(
+                    onPressed: state.isLoading
+                        ? null
+                        : () {
+                      final cardData = CardData(
+                        number: cardNumber,
+                      );
 
-                if (cardNumber.length == 16) {
-                  // Navigate to the next screen
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              child: const Text(
-                'Continuer',
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Spacer(),
-            _buildNumberPad(),
-          ],
-        ),
+                      context
+                          .read<LinkCardBloc>()
+                          .add(SubmitCard(cardData));
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 50, vertical: 15),
+                    ),
+                    child: state.isLoading
+                        ? const CircularProgressIndicator(
+                      valueColor:
+                      AlwaysStoppedAnimation<Color>(Colors.white),
+                    )
+                        : const Text(
+                      'Enregistrer',
+                      style: TextStyle(
+                          fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Spacer(),
+                  _buildNumberPad(),
+                ],
+              );
+            })
+
+
       ),
     );
   }
@@ -178,3 +261,5 @@ class _LinkCardScreenState extends State<LinkCardScreen> {
     );
   }
 }
+
+

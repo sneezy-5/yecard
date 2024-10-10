@@ -15,6 +15,8 @@ ProfileData _$ProfileDataFromJson(Map<String, dynamic> json) => ProfileData(
       phone: json['phone'] as String,
       email: json['email'] as String,
       localisation: json['localisation'] as String,
+      profile_image: json['profile_image'] as String,
+      banier: json['banier'] as String,
     );
 
 Map<String, dynamic> _$ProfileDataToJson(ProfileData instance) =>
@@ -27,4 +29,6 @@ Map<String, dynamic> _$ProfileDataToJson(ProfileData instance) =>
       'phone': instance.phone,
       'email': instance.email,
       'localisation': instance.localisation,
+      'profile_image': instance.profile_image,
+      'banier': instance.banier,
     };

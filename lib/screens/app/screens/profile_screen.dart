@@ -1,14 +1,14 @@
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yecard/repositories/portfolio_service.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:yecard/repositories/portfolio_repository.dart';
 import 'package:yecard/services/portfolio_service.dart';
 import '../../../bloc/profile_bloc.dart';
 import '../../../bloc/profile_event.dart';
-import '../../../bloc/profile_state.dart';  // Ajout de l'import du ProfileState
+import '../../../bloc/profile_state.dart';
 import '../../../models/profile_model.dart';
 import '../../../repositories/profile_repository.dart';
-import '../../../routes.dart';
 import '../../../services/profile_service.dart';
 import '../../../widgets/app_bar.dart';
 
@@ -16,7 +16,7 @@ class ProfilScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ProfileBloc(ProfileRepository(ProfileService()),PortfolioRepository(PortfolioService())),
+      create: (context) => ProfileBloc(ProfileRepository(ProfileService()), PortfolioRepository(PortfolioService())),
       child: ProfileScreen(),
     );
   }
@@ -26,6 +26,7 @@ class ProfileScreen extends StatefulWidget {
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
+
 class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   int id = 0;
@@ -33,17 +34,22 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   List<dynamic> portfolioItems = [];
   late ProfileBloc _profileBloc;
   bool _isEditing = false;
-  bool isLoading = true; // Variable de gestion du chargement
+  bool isLoading = true;
+
+  File? _selectedProfileImage;
+  File? _selectedBannerImage;
+
   final _nameController = TextEditingController();
   final _fonctionController = TextEditingController();
   final _entrepriseController = TextEditingController();
   final _biographieController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _domicicleController = TextEditingController();
+  final _domicileController = TextEditingController();
   final _siteController = TextEditingController();
   final _emailController = TextEditingController();
   final _localisationController = TextEditingController();
-
+  final _profileImageController = TextEditingController();
+  final _bannerImageController = TextEditingController();
 
   @override
   void initState() {
@@ -51,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _tabController = TabController(length: 2, vsync: this);
     _profileBloc = BlocProvider.of<ProfileBloc>(context);
     _profileBloc.add(FetchProfile());
-    _profileBloc.add(FetchPortfolio());
+    // _profileBloc.add(FetchPortfolio());
     _tabController.addListener(() {
       setState(() {
         _isOnPortfolioTab = _tabController.index == 1;
@@ -70,9 +76,26 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _emailController.dispose();
     _localisationController.dispose();
     _siteController.dispose();
-    _domicicleController.dispose();
-
+    _domicileController.dispose();
+    _profileImageController.dispose();
+    _bannerImageController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage(bool isProfileImage) async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        if (isProfileImage) {
+          _selectedProfileImage = File(pickedFile.path);
+          _saveProfile();
+        } else {
+          _selectedBannerImage = File(pickedFile.path);
+          _saveProfile();
+        }
+      });
+    }
   }
 
   @override
@@ -80,20 +103,26 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     return BlocListener<ProfileBloc, ProfileState>(
       listener: (context, state) {
         if (state is ProfileLoaded) {
-          _fillProfileData(state.profileData);
+          _fillProfileData(state.profileData );
           setState(() {
             isLoading = false;
-            id= state.profileData.id;
-          });
-        } else if (state is PortfolioLoaded) {
-          setState(() {
-            portfolioItems = state.portfolioData as List;
+            id = state.profileData.id;
+            print("PROFILELLE${state.portfolioData}");
           });
         }
-        else if (state is ProfileError) {
+        if (state is PortfolioLoaded) {
+          setState(() {
+            isLoading = false;
+            portfolioItems = state.portfolioData as List;
+          });
+        } else if (state is ProfileError) {
           setState(() {
             isLoading = false;
           });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.error)),
+          );
+        } else if (state.message.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.message)),
           );
@@ -106,11 +135,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           customBackIcon: Icons.arrow_back_ios,
           actions: [
             if (_isOnPortfolioTab)
+
               IconButton(
                 icon: Icon(Icons.add_circle_outline),
                 color: Colors.white,
                 onPressed: () {
-                  // AppRoutes.pushReplacement(context, AppRoutes.appAddPortfolio);
                   Navigator.of(context).pushNamed('/app/add_portfolio');
                 },
               ),
@@ -124,13 +153,20 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               children: [
                 Stack(
                   children: [
-
-                    Container(
-                      width: double.infinity,
-                      height: 100,
-                      child: Image.network(
-                        'https://cdn.shopify.com/static/sample-images/bath_grande_crop_center.jpeg',
-                        fit: BoxFit.cover,
+                    GestureDetector(
+                      onTap: () => _pickImage(false), // Pick banner image
+                      child: Container(
+                        width: double.infinity,
+                        height: 100,
+                        child: _selectedBannerImage == null
+                            ? Image.network(
+                          _bannerImageController.text,
+                          fit: BoxFit.cover,
+                        )
+                            : Image.file(
+                          _selectedBannerImage!,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                     ),
                     Positioned(
@@ -139,7 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       child: IconButton(
                         icon: Icon(Icons.edit, color: Colors.white),
                         onPressed: () {
-                          print('Edit button pressed');
+                          _pickImage(false); // Pick new banner image
                         },
                       ),
                     ),
@@ -156,9 +192,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                       Positioned(
                         top: 50,
                         left: MediaQuery.of(context).size.width / 2 - 50,
-                        child: CircleAvatar(
-                          radius: 50,
-                          backgroundImage: AssetImage('assets/images/profil.png'),
+                        child: GestureDetector(
+                          onTap: () => _pickImage(true), // Pick profile image
+                          child: CircleAvatar(
+                            radius: 50,
+                            backgroundImage: _selectedProfileImage == null
+                                ? NetworkImage(_profileImageController.text)
+                                : FileImage(_selectedProfileImage!) as ImageProvider,
+                          ),
                         ),
                       ),
                       Positioned(
@@ -229,187 +270,63 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
   Widget _buildAboutTab() {
     return Padding(
-        padding: const EdgeInsets.all(10.0),
-        child:ListView(
-            padding: EdgeInsets.zero,
+      padding: const EdgeInsets.all(10.0),
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Biographie',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-                  IconButton(
-                    onPressed: () {
-                      if (_isEditing) {
-                        _saveProfile();
-                      }
-                      setState(() {
-                        _isEditing = !_isEditing;
-                      });
-                    },
-                    icon: Icon(_isEditing ? Icons.check : Icons.edit),
-                    tooltip: _isEditing ? 'Save' : 'Edit',
-                  ),
-                ],
+              Text(
+                'Biographie',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              SizedBox(height: 10),
-              _isEditing
-                  ? _buildEditableTextField(_biographieController, 5)
-                  : _buildReadOnlyTextField(_biographieController.text),
-              SizedBox(height: 10),
-
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Mes coordonees',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-
-
-                  IconButton(
-                    onPressed: () {
-                      if (_isEditing) {
-                        _saveProfile();
-                      }
-                      setState(() {
-                        _isEditing = !_isEditing;
-                      });
-                    },
-                    icon: Icon(_isEditing ? Icons.check : Icons.edit),
-                    tooltip: _isEditing ? 'Save' : 'Edit',
-                  ),
-                ],
-              ),
-              ListTile(
-                leading:  Icon(Icons.verified_user),
-                title: Text('Nom'),
-                onTap: () {
-
+              IconButton(
+                onPressed: () {
+                  if (_isEditing) {
+                    _saveProfile();
+                  }
+                  setState(() {
+                    _isEditing = !_isEditing;
+                  });
                 },
+                icon: Icon(_isEditing ? Icons.check : Icons.edit),
+                tooltip: _isEditing ? 'Save' : 'Edit',
               ),
-              _isEditing
-                  ? _buildEditableTextField(_nameController, 1)
-                  : _buildReadOnlyTextField(_nameController.text),
-
-              ListTile(
-                leading:  Icon(Icons.email),
-                title: Text('Email'),
-                onTap: () {
-
-                },
-              ),
-              _isEditing
-                  ? _buildEditableTextField(_emailController, 1)
-                  : _buildReadOnlyTextField(_emailController.text),
-
-
-              ListTile(
-                leading: Icon(Icons.phone),
-                title: Text('Phone'),
-                onTap: () {
-
-                },
-              ),
-              _isEditing
-                  ? _buildEditableTextField(_phoneController, 1)
-                  : _buildReadOnlyTextField(_phoneController.text),
-              SizedBox(height: 10),
-
-              ListTile(
-                leading: Icon(Icons.web),
-                title: Text('Portfolio Site'),
-                onTap: () {
-
-                },
-              ),
-              _isEditing
-                  ? _buildEditableTextField(_siteController, 1)
-                  : _buildReadOnlyTextField(_siteController.text),
-              SizedBox(height: 10),
-
-              ListTile(
-                leading: Icon(Icons.phone),
-                title: Text('Domicile'),
-                onTap: () {
-
-                },
-              ),
-              _isEditing
-                  ? _buildEditableTextField(_domicicleController, 1)
-                  : _buildReadOnlyTextField(_domicicleController.text),
-              SizedBox(height: 10),
-
-              Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Mes Reseaux sociaux',
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _isEditing = !_isEditing;
-                      });
-                    },
-                    icon: Icon(_isEditing ? Icons.check : Icons.edit),
-                    tooltip: _isEditing ? 'Save' : 'Edit',
-                  ),
-                ],
-              ),
-              ListTile(
-                leading: Container(
-                  width: 50,
-                  height: 10,
-                  child: Icon(Icons.facebook_outlined),
-                ),
-                title: Text('Koffi yohan'),
-                onTap: () {
-
-                },
-              ),
-              ListTile(
-                leading: Container(
-                  width: 50,
-                  height: 10,
-                  child: Icon(Icons.whatshot_outlined),
-                ),
-                title: Text('225 00000000'),
-                onTap: () {
-
-                },
-              ),
-              ListTile(
-                leading: Container(
-                  width: 50,
-                  height: 10,
-                  child: Icon(Icons.face),
-                ),
-                title: Text('koffi yohan'),
-                onTap: () {
-
-                },
-              ),
-            ]
-        )
+            ],
+          ),
+          SizedBox(height: 10),
+          _isEditing
+              ? _buildEditableTextField(_biographieController, 5)
+              : _buildReadOnlyTextField(_biographieController.text),
+          SizedBox(height: 10),
+          // Similar sections for other fields...
+          _buildFieldWithLabel(Icons.label,'Nom', _nameController),
+          _buildFieldWithLabel(Icons.mail_outline,'Email', _emailController),
+          _buildFieldWithLabel(Icons.phone,'Phone', _phoneController),
+          _buildFieldWithLabel(Icons.label,'Portfolio Site', _siteController),
+          _buildFieldWithLabel(Icons.house,'Domicile', _domicileController),
+        ],
+      ),
     );
   }
+
+  Widget _buildFieldWithLabel( IconData icon, String label, TextEditingController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ListTile(
+          leading: Icon(icon),
+          title: Text(label),
+        ),
+        _isEditing
+            ? _buildEditableTextField(controller, 1)
+            : _buildReadOnlyTextField(controller.text),
+        SizedBox(height: 10),
+      ],
+    );
+  }
+
   Widget _buildPortfolioTab() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -449,10 +366,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       ),
     );
   }
-  Widget _buildEditableTextField(TextEditingController controller, int maxlines) {
+
+  Widget _buildEditableTextField(TextEditingController controller, int maxLines) {
     return TextField(
       controller: controller,
-      maxLines: maxlines,
+      maxLines: maxLines,
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
@@ -475,6 +393,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _phoneController.text = profileData.phone;
     _emailController.text = profileData.email;
     _localisationController.text = profileData.localisation;
+    _profileImageController.text = profileData.profile_image;
+    _bannerImageController.text = profileData.banier;
+
   }
 
   void _saveProfile() {
@@ -487,14 +408,18 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       phone: _phoneController.text,
       email: _emailController.text,
       localisation: _localisationController.text,
-
+      profile_image: '',
+      banier: '',
     );
 
-    _profileBloc.add(UpdateProfile(profileData: updatedProfile));
+    _profileBloc.add(UpdateProfile(
+      profileData: updatedProfile,
+      picture: _selectedProfileImage,
+      banier: _selectedBannerImage,
+    ));
 
     setState(() {
-      _isEditing != _isEditing;
+      _isEditing = false;
     });
   }
 }
-

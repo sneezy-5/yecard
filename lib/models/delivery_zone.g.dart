@@ -7,10 +7,18 @@ part of 'delivery_zone.dart';
 // **************************************************************************
 
 DeliveryZone _$DeliveryZoneFromJson(Map<String, dynamic> json) => DeliveryZone(
-      name: json['name'] as String,
+      f_user: (json['f_user'] as num).toInt(),
+      reference: json['reference'] as String,
+      nbr_cart: json['nbr_cart'] as String,
+      phone: json['phone'] as String,
+      lieu: json['lieu'] as String,
     );
 
 Map<String, dynamic> _$DeliveryZoneToJson(DeliveryZone instance) =>
     <String, dynamic>{
-      'name': instance.name,
+      'f_user': instance.f_user,
+      'lieu': instance.lieu,
+      'reference': instance.reference,
+      'nbr_cart': instance.nbr_cart,
+      'phone': instance.phone,
     };

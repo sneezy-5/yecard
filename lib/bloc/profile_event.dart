@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 import '../models/profile_model.dart';
 
@@ -14,8 +16,10 @@ class FetchProfile extends ProfileEvent {}
 // Événement pour mettre à jour le profil
 class UpdateProfile extends ProfileEvent {
   final ProfileData profileData;
+  final File? picture;
+  final File? banier;
 
-  const UpdateProfile({required this.profileData});
+  const UpdateProfile({required this.profileData, this.picture, this.banier});
 
   @override
   List<Object?> get props => [profileData];

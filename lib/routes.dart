@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yecard/repositories/delivery_repository.dart';
 import 'package:yecard/screens/app/home_screen.dart';
+import 'package:yecard/screens/app/screens/add_card.dart';
 import 'package:yecard/screens/app/screens/add_portfolio.dart';
 import 'package:yecard/screens/app/screens/card_order.dart';
+import 'package:yecard/screens/app/screens/code_qr_screen.dart';
 import 'package:yecard/screens/app/screens/portfolio_details.dart';
 import 'package:yecard/screens/app/screens/profile_screen.dart';
 import 'package:yecard/screens/home_sccreen.dart';
@@ -22,9 +24,11 @@ class AppRoutes {
   static const String createPassword = '/create_password';
   static const String appHome = '/app/home';
   static const String appProfile = '/app/profile';
+  static const String appAddCard= '/app/add_card';
   static const String appPortfolioDetail = '/app/portfolio_detail';
   static const String appAddPortfolio = '/app/add_portfolio';
   static const String appGetOrder = '/app/order';
+  static const String appGetQrcode = '/app/qr_code_screen';
 
   // Gestion des routes
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -47,21 +51,12 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => PortfolioDetailScreen());
       case appAddPortfolio:
         return MaterialPageRoute(builder: (_) => PortfolioFormScreen());
+      case appAddCard:
+        return MaterialPageRoute(builder: (_) => LinkCardScreen());
+      case appGetQrcode:
+        return MaterialPageRoute(builder: (_) => QrCodeScannerScreen());
       case appGetOrder:
-        return MaterialPageRoute(
-          builder: (_) {
-            // Créez une instance de DeliveryRepository
-            final deliveryRepository = DeliveryRepository(
-              deliveryService: DeliveryService(),
-            );
-
-            // Injectez le repository dans le DeliveryBloc
-            return BlocProvider(
-              create: (_) => DeliveryBloc(deliveryRepository),
-              child: DeliveryScreen(),
-            );
-          },
-        );
+        return MaterialPageRoute(builder: (_) =>DeliveryScreen(),);
 
       default:
         return MaterialPageRoute(

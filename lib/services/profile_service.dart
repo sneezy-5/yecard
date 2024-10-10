@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:yecard/models/profile_model.dart';
 import 'package:yecard/services/user_preference.dart';
 
 class ProfileService {
-  final String _baseUrl = 'https://yecard.pro';
+  // final String _baseUrl = 'https://yecard.pro';
+  final String _baseUrl = 'http://192.168.1.37:8000';
 
   // Méthode pour récupérer le profil avec un appel GET
   Future<Map<String, dynamic>> getProfile() async {
@@ -59,7 +61,7 @@ class ProfileService {
   }
 
   // Méthode pour mettre à jour le profil avec un appel PATCH
-  Future<Map<String, dynamic>> updateProfile(ProfileData updateData, int id) async {
+  Future<Map<String, dynamic>> updateProfile(ProfileData updateData, int id, File? picture, File? banier) async {
     try {
       String? token = await UserPreferences.getUserToken();
       print('$_baseUrl/api/v0/users/${id}/');
@@ -67,26 +69,52 @@ class ProfileService {
         throw Exception("Token non disponible");
       }
       print("DATA : ${updateData}");
-      final response = await http.patch(
+
+      var request = http.MultipartRequest(
+        'PATCH',
         Uri.parse('$_baseUrl/api/v0/users/${id}/'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(updateData),
       );
 
-      print("Statut de la réponse PATCH : ${response.statusCode}");
+      request.headers['Authorization'] = 'Bearer $token';
 
+
+      request.fields['name'] = updateData.name;
+      request.fields['fonction'] = updateData.fonction;
+      request.fields['entreprise'] = updateData.entreprise;
+      request.fields['phone'] = updateData.phone;
+      request.fields['biographie'] = updateData.biographie;
+      request.fields['email'] = updateData.email;
+      request.fields['localisation'] = updateData.localisation;
+
+
+
+      if (picture != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'picture',
+            picture.path,
+          ),
+        );
+      }
+      if (banier != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath(
+            'b_picture',
+            banier.path,
+          ),
+        );
+      }
+
+      var response = await request.send();
       if (response.statusCode == 200) {
-        final responseBody = jsonDecode(response.body);
+        final responseBody = await response.stream.bytesToString();
         return {
           'success': true,
           'data': responseBody,
           'message': 'Profil mis à jour avec succès',
         };
       } else if (response.statusCode == 400) {
-        final responseBody = jsonDecode(response.body);
+        final responseBody = await response.stream.bytesToString();
         print("Statut de la réponse PATCH : ${responseBody}");
         return {
           'success': false,
@@ -103,6 +131,8 @@ class ProfileService {
           'error': "Accès non autorisé. Veuillez vous reconnecter.",
         };
       } else {
+        print("Statut de la réponse PATCH : ${response.statusCode}");
+
         return {
           'success': false,
           'error': 'Erreur inconnue. Statut: ${response.statusCode}',

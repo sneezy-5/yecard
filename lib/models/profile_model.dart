@@ -12,6 +12,8 @@ class ProfileData {
   final String phone;
   final String email;
   final String localisation;
+  final String profile_image;
+  final String banier;
 
   ProfileData({
     required this.id,
@@ -22,6 +24,9 @@ class ProfileData {
     required this.phone,
     required this.email,
     required this.localisation,
+    required this.profile_image,
+    required this.banier
+
 
 
   });

@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yecard/repositories/profile_repository.dart';
 import '../models/portfolio.dart';
-import '../repositories/portfolio_service.dart';
+import '../repositories/portfolio_repository.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
 import '../models/profile_model.dart';
@@ -12,27 +12,40 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   ProfileBloc( this._profileRepository, this._portfolioRepository) : super(const ProfileState()) {
     on<FetchProfile>(_onFetchProfile);
+    // on<FetchPortfolio>(_onFetchPortfolio);
     on<UpdateProfile>(_onUpdateProfile);
-    on<FetchPortfolio>(_onFetchPortfolio);
   }
 
   // Gestion de l'événement FetchProfile
   Future<void> _onFetchProfile(FetchProfile event, Emitter<ProfileState> emit) async {
-    emit(state.copyWith(isLoading: true));
+    // emit(state.copyWith(isLoading: true));
     emit(ProfileLoading());
     try {
       final response = await _profileRepository.profile();
+      final responses = await _portfolioRepository.portfolio();
       if (response['success']) {
-        print(response['data']);
+        print("PROFILE ${response['data']}");
         final profileData = ProfileData.fromJson(response['data']);
-        emit(state.copyWith(isLoading: false, profileData: profileData));
+        emit(state.copyWith(isLoading: false, profileData: profileData, isSuccess: true));
         emit(ProfileLoaded(profileData: profileData));
       } else {
         emit(state.copyWith(isLoading: false, error: response['error']));
         emit(ProfileError(message: "Failed to load profile"));
 
       }
+
+      if (responses['success']) {
+        print("PORTFOLIO: ${response['data']}");
+        final portfolioData = PortfolioData.fromJson(response['data']);
+        emit(state.copyWith(isLoading: false, portfolioData: portfolioData, isSuccess: true));
+        emit(PortfolioLoaded(portfolioData: portfolioData));
+      } else {
+        emit(state.copyWith(isLoading: false, error: response['error']));
+        emit(ProfileError(message: "Failed to load portfolio"));
+
+      }
     } catch (e) {
+      print("PROFILE ${e}");
       emit(state.copyWith(isLoading: false, error: 'Erreur lors du chargement du profil'));
     }
   }
@@ -40,15 +53,18 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   Future<void> _onFetchPortfolio(FetchPortfolio event, Emitter<ProfileState> emit) async {
     emit(ProfileLoading());
+    // emit(state.copyWith(isLoading: true));
+
     try {
       final response = await _portfolioRepository.portfolio();
       if (response['success']) {
-        print(response['data']);
+        print("PORTFOLIO: ${response['data']}");
         final portfolioData = PortfolioData.fromJson(response['data']);
+        emit(state.copyWith(isLoading: false, portfolioData: portfolioData, isSuccess: true));
         emit(PortfolioLoaded(portfolioData: portfolioData));
       } else {
         emit(state.copyWith(isLoading: false, error: response['error']));
-        emit(ProfileError(message: "Failed to load profile"));
+        emit(ProfileError(message: "Failed to load portfolio"));
 
       }
     } catch (e) {
@@ -60,9 +76,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   Future<void> _onUpdateProfile(UpdateProfile event, Emitter<ProfileState> emit) async {
     emit(state.copyWith(isLoading: true));
     try {
-      final response = await _profileRepository.updateProfile(event.profileData, event.profileData.id);
+      final response = await _profileRepository.updateProfile(event.profileData, event.profileData.id, event.picture, event.banier);
       if (response['success']) {
-        emit(state.copyWith(isLoading: false, isSuccess: true, profileData: event.profileData));
+        emit(state.copyWith(isLoading: false, isSuccess: true, profileData: event.profileData, message: response["message"], error: ''));
       } else {
         emit(state.copyWith(isLoading: false, error: response['error']));
       }

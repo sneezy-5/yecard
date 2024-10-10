@@ -2,11 +2,11 @@ import '../models/delivery_zone.dart';
 import '../services/delivery_service.dart';
 
 class DeliveryRepository {
-  final DeliveryService deliveryService;
+  final DeliveryService _deliveryService;
 
-  DeliveryRepository({required this.deliveryService});
+  DeliveryRepository(this._deliveryService);
 
-  Future<List<DeliveryZone>> getDeliveryZones() {
-    return deliveryService.fetchDeliveryZones();
+  Future<Map<String, dynamic>> addDelivery(DeliveryZone deliveryData) async {
+    return await _deliveryService.addDelivery(deliveryData);
   }
 }

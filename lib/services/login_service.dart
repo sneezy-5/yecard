@@ -5,7 +5,8 @@ import 'package:yecard/services/user_preference.dart';
 import '../models/login_model.dart';
 
 class LoginService {
-  final String _baseUrl = 'https://yecard.pro';
+  // final String _baseUrl = 'https://yecard.pro';
+  final String _baseUrl = 'http://192.168.1.37:8000';
 
   Future<Map<String, dynamic>> login(LoginModelData loginData) async {
     print("DATA ${loginData.toJson()}");

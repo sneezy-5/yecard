@@ -27,8 +27,8 @@ class ReusableAppBar extends StatelessWidget implements PreferredSizeWidget {
         icon: Icon(customBackIcon ?? Icons.arrow_back),
         color: Colors.white,
         onPressed: () {
-          // Navigator.of(context).pop();
-          AppRoutes.pushReplacement(context, AppRoutes.appHome);
+          Navigator.of(context).pop();
+          // AppRoutes.pushReplacement(context, AppRoutes.appHome);
 
         },
       )

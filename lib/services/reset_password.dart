@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import '../models/password_reset.dart';
 
 class ResetService {
-  final String _baseUrl = 'https://yecard.pro';
+  // final String _baseUrl = 'https://yecard.pro';
+  final String _baseUrl = 'http://192.168.1.37:8000';
 
   Future<Map<String, dynamic>> reset(PasswordResetData passwordResetData, int id) async {
     print("DATA ${passwordResetData.toJson()}");

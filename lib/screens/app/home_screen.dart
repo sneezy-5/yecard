@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yecard/screens/app/screens/card_screen.dart';
 import 'package:yecard/screens/app/screens/code_qr_screen.dart';
 import 'package:yecard/screens/app/screens/contacts_screen.dart';
+
+import '../../bloc/profile_bloc.dart';
+import '../../repositories/portfolio_repository.dart';
+import '../../repositories/profile_repository.dart';
+import '../../services/portfolio_service.dart';
+import '../../services/profile_service.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -12,8 +19,12 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
   final List<Widget> _pages = [
-    CardScreen(),
-    ContactsScreen(),
+  BlocProvider(
+  create: (context) => ProfileBloc(ProfileRepository(ProfileService()), PortfolioRepository(PortfolioService())),
+  child: CardScreen(),
+  ),
+    // CardScreen(),
+    // ContactsScreen(),
     QrCodeScannerScreen()
   ];
 
@@ -30,32 +41,25 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            // icon: Image.asset(
-            //   'assets/images/button_card.png',
-            //   width: 50,
-            //   height: 20,
-            // ),
-            icon: Icon(Icons.credit_card_outlined),
+            icon:  Padding(
+              padding: const EdgeInsets.only(left: 50.0),
+              child: Icon(Icons.credit_card_outlined, size: 50),
+            ),
             label: 'Card',
           ),
+          // BottomNavigationBarItem(
+          //   icon: Icon(Icons.person_2_outlined),
+          //   label: 'Contacts',
+          // ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_2_outlined),
-            // icon: Image.asset(
-            //   'assets/images/button_person.png',
-            //   width: 50,
-            //   height: 20,
-            // ),
-            label: 'Contacts',
-          ),
-          BottomNavigationBarItem(
-            // icon: Image.asset(
-            //   'assets/images/buttom_qr.png',
-            //   width: 50,
-            //   height: 20,
-            // ),
-            icon: Icon(Icons.qr_code),
+
+            icon: Padding(
+            padding: const EdgeInsets.only(right: 50.0),
+              child: Icon(Icons.qr_code, size: 50,),
+            ),
             label: 'QR Code',
           ),
+
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.green,

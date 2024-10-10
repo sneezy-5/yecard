@@ -4,33 +4,41 @@ import '../models/profile_model.dart';
 
 class ProfileState extends Equatable {
   final ProfileData? profileData;
+  final PortfolioData? portfolioData;
   final bool isLoading;
   final bool isSuccess;
   final String error;
+  final String message;
 
   const ProfileState({
     this.profileData,
+    this.portfolioData,
     this.isLoading = false,
     this.isSuccess = false,
+    this.message='',
     this.error = '',
   });
 
   ProfileState copyWith({
     ProfileData? profileData,
+    PortfolioData? portfolioData,
     bool? isLoading,
     bool? isSuccess,
+    String? message,
     String? error,
   }) {
     return ProfileState(
       profileData: profileData ?? this.profileData,
+      portfolioData: portfolioData ?? this.portfolioData,
       isLoading: isLoading ?? this.isLoading,
       isSuccess: isSuccess ?? this.isSuccess,
+      message: error ?? this.message,
       error: error ?? this.error,
     );
   }
 
   @override
-  List<Object?> get props => [profileData, isLoading, isSuccess, error];
+  List<Object?> get props => [profileData,portfolioData, isLoading, isSuccess, error, message];
 }
 
 

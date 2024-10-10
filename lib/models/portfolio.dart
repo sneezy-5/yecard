@@ -6,6 +6,7 @@ part 'portfolio.g.dart';
 class PortfolioData {
   final int id;
   final String title;
+  final String description;
   final String file_1;
   final String file_2;
   final String file_3;
@@ -14,6 +15,7 @@ class PortfolioData {
   PortfolioData({
     required this.id,
     required this.title,
+    required this.description,
     required this.file_1,
     required this.file_2,
     required this.file_3,

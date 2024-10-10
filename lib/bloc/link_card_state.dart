@@ -1,41 +1,34 @@
 import 'package:equatable/equatable.dart';
 
-class DeliveryState extends Equatable {
-  final String selectedZone;
-  final List<String> zones;
+class LinkCardState extends Equatable {
   final String cardNumber;
-  final String phoneNumber;
+  final bool isValid;
   final bool isLoading;
   final bool isSuccess;
   final String errorMessage;
   final Map<String, List<String>> errorMessages;
 
-  DeliveryState({
-    this.selectedZone = '',
-    this.zones = const [],
+  const LinkCardState({
     this.cardNumber = '',
-    this.phoneNumber = '',
+    this.isValid = false,
     this.isLoading = false,
     this.isSuccess = false,
     this.errorMessage = '',
     this.errorMessages = const {},
   });
 
-  DeliveryState copyWith({
-    String? selectedZone,
-    List<String>? zones,
+  // Méthode copyWith pour créer un nouvel état tout en modifiant seulement les champs souhaités
+  LinkCardState copyWith({
     String? cardNumber,
-    String? phoneNumber,
+    bool? isValid,
     bool? isLoading,
     bool? isSuccess,
     String? errorMessage,
     Map<String, List<String>>? errorMessages,
   }) {
-    return DeliveryState(
-      selectedZone: selectedZone ?? this.selectedZone,
-      zones: zones ?? this.zones,
+    return LinkCardState(
       cardNumber: cardNumber ?? this.cardNumber,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
+      isValid: isValid ?? this.isValid,
       isLoading: isLoading ?? this.isLoading,
       isSuccess: isSuccess ?? this.isSuccess,
       errorMessage: errorMessage ?? this.errorMessage,
@@ -44,5 +37,12 @@ class DeliveryState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [selectedZone, zones, cardNumber, phoneNumber, isLoading, errorMessage, errorMessages, isSuccess];
+  List<Object?> get props => [
+    cardNumber,
+    isValid,
+    isLoading,
+    isSuccess,
+    errorMessage,
+    errorMessages,
+  ];
 }
