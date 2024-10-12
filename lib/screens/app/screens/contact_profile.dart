@@ -66,21 +66,21 @@ class _CProfileScreenState extends State<ContactProfileWiew>
 
   Future<void> _fetchData() async {
     try {
-      final portfolioResponse = await _portfolioRepository.getContactPortfolio((args?['id']));
+      // final portfolioResponse = await _portfolioRepository.getContactPortfolio((args?['id']));
       final profileResponse = await _profileRepository.contactProfile(args?['id']);
 
       setState(() {
         print("PROFILEEA:${profileResponse }");
         print("PROFILEEE:${args?['id'] }");
-        print("PORTFOLIO:${portfolioResponse }");
-        if (portfolioResponse['success']) {
-          if (portfolioResponse['data']){
-            // final protfolioData = PortfolioData.fromJson(portfolioResponse['data']);
-            portfolioItems = portfolioResponse['data'];
-          }
-
-
-        }
+        // print("PORTFOLIO:${portfolioResponse }");
+        // if (portfolioResponse['success']) {
+        //   if (portfolioResponse['data']){
+        //     // final protfolioData = PortfolioData.fromJson(portfolioResponse['data']);
+        //     portfolioItems = portfolioResponse['data'];
+        //   }
+        //
+        //
+        // }
         if (profileResponse['success'] ) {
           final profileData = ProfileData.fromJson(profileResponse['data']);
           _fillProfileData(profileData);
@@ -323,7 +323,10 @@ class _CProfileScreenState extends State<ContactProfileWiew>
           _buildFieldWithLabel(Icons.house, 'Domicile', _domicileController),
           ElevatedButton(
             onPressed: _saveProfileAsContact,
-            child: const Text('Enregistrer'),
+            child: const Text('Enregistrer sur le téléphone',
+            style: TextStyle(
+              color: Colors.blue
+            ),),
           ),
         ],
       ),

@@ -142,15 +142,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           showBackButton: true,
           customBackIcon: Icons.arrow_back_ios,
           actions: [
-            if (_isOnPortfolioTab)
-
-              IconButton(
-                icon: Icon(Icons.add_circle_outline),
-                color: Colors.white,
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/app/add_portfolio');
-                },
-              ),
+            // if (_isOnPortfolioTab)
+            //
+            //   IconButton(
+            //     icon: Icon(Icons.add_circle_outline),
+            //     color: Colors.white,
+            //     onPressed: () {
+            //       Navigator.of(context).pushNamed('/app/add_portfolio');
+            //     },
+            //   ),
           ],
         ),
         body: isLoading
