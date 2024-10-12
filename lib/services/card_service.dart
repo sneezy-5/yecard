@@ -6,7 +6,7 @@ import '../models/card_model.dart';
 
 class CardService {
   // final String _baseUrl = 'https://yecard.pro';
-  final String _baseUrl = 'http://192.168.1.37:8000';
+  final String _baseUrl = 'http://192.168.145.199:8000';
 
   Future<Map<String, dynamic>> getCard() async {
     try {
@@ -17,7 +17,7 @@ class CardService {
       }
 
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/v0/account/profile/'),
+        Uri.parse('$_baseUrl/api/v0/card/'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
@@ -28,10 +28,10 @@ class CardService {
 
       if (response.statusCode == 200) {
         final responseBody = jsonDecode(response.body);
-        print("data : ${responseBody["results"][0]}");
+        print("data : ${responseBody["results"]}");
         return {
           'success': true,
-          'data': responseBody["results"][0],
+          'data': responseBody["results"],
         };
       } else if (response.statusCode == 401) {
         return {

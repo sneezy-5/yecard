@@ -29,6 +29,13 @@ class _CardScreenState extends State<CardScreen> {
   late int id;
   List portfolioItems = [];
 
+  @override
+  void initState() {
+    super.initState();
+    // Fetch profile data when the screen is loaded
+    BlocProvider.of<ProfileBloc>(context).add(FetchProfile());
+  }
+
   void _onDrawerOpened() {
     BlocProvider.of<ProfileBloc>(context).add(FetchProfile());
   }
@@ -91,7 +98,7 @@ class _CardScreenState extends State<CardScreen> {
                     _nameController.text.isNotEmpty
                         ? _nameController.text
                         : 'Nom inconnu',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 20,
                       color: Colors.black,
                       fontWeight: FontWeight.w500,
@@ -154,125 +161,130 @@ class _CardScreenState extends State<CardScreen> {
           }
         },
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+          child: ListView(
             children: [
-              Padding(
-                padding: const EdgeInsets.all(50.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        _scaffoldKey.currentState?.openEndDrawer();
+              Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(50.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            _scaffoldKey.currentState?.openEndDrawer();
+                          },
+                          child: Icon(Icons.menu_rounded),
+                        ),
+                        SizedBox(height: 30),
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).pushNamed('/app/qr_code_screen');
+                          },
+                          child: const Icon(Icons.qr_code_scanner_rounded),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(
+                    height: 110, // Hauteur fixe pour le ListView
+                    child: ListView(
+                      scrollDirection: Axis.horizontal,
+                      children: <Widget>[
+                        // Item 1 avec bordure et espace
+                        Container(
+                          width: 380,
+                          margin: EdgeInsets.symmetric(horizontal: 6),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child: Image.asset(
+                            'assets/images/slide1.png',
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
+                        // Item 2 avec bordure et espace
+                        Container(
+                          width: 380,
+                          margin: EdgeInsets.symmetric(horizontal: 6),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.black, width: 2),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child: Image.asset(
+                            'assets/images/slide1.png',
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).pushNamed('/app/profile');
+                        },
+                        child: Image.network(_profileImageController.text,
+                          width: 300,
+                          height: 250,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 30),
+                  SizedBox(
+                    width: 293,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        AppRoutes.pushReplacement(context, AppRoutes.appGetOrder);
                       },
-                      child: Icon(Icons.menu_rounded),
-                    ),
-                    SizedBox(height: 30),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/app/qr_code_screen');
-                      },
-                      child: Icon(Icons.qr_code_scanner_rounded),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                height: 110, // Hauteur fixe pour le ListView
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: <Widget>[
-                    // Item 1 avec bordure et espace
-                    Container(
-                      width: 380,
-                      margin: EdgeInsets.symmetric(horizontal: 6),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black),
-                        borderRadius: BorderRadius.circular(16),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
                       ),
-                      clipBehavior: Clip.hardEdge,
-                      child: Image.asset(
-                        'assets/images/slide1.png',
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
+                      child: const Text(
+                        'Commander sa carte de visite physique',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
-                    ),
-                    // Item 2 avec bordure et espace
-                    Container(
-                      width: 380,
-                      margin: EdgeInsets.symmetric(horizontal: 6),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.black, width: 2),
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      clipBehavior: Clip.hardEdge,
-                      child: Image.asset(
-                        'assets/images/slide1.png',
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Card(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16.0),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pushNamed('/app/profile');
-                    },
-                    child: Image.network(_profileImageController.text,
-                      width: 248,
-                      height: 351,
                     ),
                   ),
-                ),
-              ),
-              SizedBox(height: 30),
-              SizedBox(
-                width: 293,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () {
-                    AppRoutes.pushReplacement(context, AppRoutes.appGetOrder);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                  ),
-                  child: Text(
-                    'Commander sa carte de visite physique',
-                    style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
+                ],
               ),
             ],
-          ),
+          )
+
         ),
       ),
     );
   }
 
   void _fillProfileData(ProfileData profileData) {
-    _nameController.text = profileData.name;
-    _fonctionController.text = profileData.fonction;
-    _entrepriseController.text = profileData.entreprise;
-    _biographieController.text = profileData.biographie;
-    _phoneController.text = profileData.phone;
-    _emailController.text = profileData.email;
-    _localisationController.text = profileData.localisation;
-    _profileImageController.text = profileData.profile_image;
+    _nameController.text = profileData.name!;
+    _fonctionController.text = profileData.fonction!;
+    _entrepriseController.text = profileData.entreprise!;
+    _biographieController.text = profileData.biographie!;
+    _phoneController.text = profileData.phone!;
+    _emailController.text = profileData.email!;
+    _localisationController.text = profileData.localisation!;
+    _profileImageController.text = profileData.profile_image!;
     print(_profileImageController.text.toString());
   }
 }

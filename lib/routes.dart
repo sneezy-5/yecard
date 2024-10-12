@@ -6,6 +6,7 @@ import 'package:yecard/screens/app/screens/add_card.dart';
 import 'package:yecard/screens/app/screens/add_portfolio.dart';
 import 'package:yecard/screens/app/screens/card_order.dart';
 import 'package:yecard/screens/app/screens/code_qr_screen.dart';
+import 'package:yecard/screens/app/screens/contact_profile.dart';
 import 'package:yecard/screens/app/screens/portfolio_details.dart';
 import 'package:yecard/screens/app/screens/profile_screen.dart';
 import 'package:yecard/screens/home_sccreen.dart';
@@ -29,6 +30,8 @@ class AppRoutes {
   static const String appAddPortfolio = '/app/add_portfolio';
   static const String appGetOrder = '/app/order';
   static const String appGetQrcode = '/app/qr_code_screen';
+  static const String appContactProfile = '/app/contact_profile';
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   // Gestion des routes
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -47,8 +50,20 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => HomePage());
       case appProfile:
         return MaterialPageRoute(builder: (_) => ProfilScreen());
+      // case appPortfolioDetail:
+      //   return MaterialPageRoute(builder: (_) => PortfolioDetailScreen());
       case appPortfolioDetail:
-        return MaterialPageRoute(builder: (_) => PortfolioDetailScreen());
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => PortfolioDetailScreen(args: args),
+        );
+
+      case appContactProfile:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => ContactProfileWiew(args: args),
+        );
+
       case appAddPortfolio:
         return MaterialPageRoute(builder: (_) => PortfolioFormScreen());
       case appAddCard:

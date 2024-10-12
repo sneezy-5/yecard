@@ -6,11 +6,11 @@ import 'profile_event.dart';
 import 'profile_state.dart';
 import '../models/profile_model.dart';
 
-class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
+class ContactBloc extends Bloc<ProfileEvent, ProfileState> {
   final ProfileRepository _profileRepository;
   final PortfolioRepository _portfolioRepository;
 
-  ProfileBloc( this._profileRepository, this._portfolioRepository) : super(const ProfileState()) {
+  ContactBloc( this._profileRepository, this._portfolioRepository) : super(const ProfileState()) {
     on<FetchProfile>(_onFetchProfile);
     // on<FetchPortfolio>(_onFetchPortfolio);
     on<UpdateProfile>(_onUpdateProfile);

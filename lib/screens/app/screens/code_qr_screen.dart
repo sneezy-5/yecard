@@ -1,204 +1,134 @@
-//
-// import 'package:flutter/material.dart';
-// import 'package:mobile_scanner/mobile_scanner.dart';
-// import 'package:flutter/foundation.dart';
-//
-// class BusinessCardScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Column(
-//         children: [
-//           SizedBox(height: 50),
-//           // _buildBusinessCard(),
-//           _buildBusinessQrCard(),
-//           Spacer(),
-//           _buildShareButton(context),
-//           SizedBox(height: 10),
-//           _buildLinkCardButton(context),
-//           SizedBox(height: 50),
-//         ],
-//       ),
-//     );
-//   }
-//
-//   // Widget _buildBusinessCard() {
-//   //   return Center(
-//   //     child: Container(
-//   //       width: 300,
-//   //       height: 180,
-//   //       padding: EdgeInsets.all(16),
-//   //       decoration: BoxDecoration(
-//   //         color: Colors.white,
-//   //         borderRadius: BorderRadius.circular(12),
-//   //         border: Border.all(color: Colors.grey.shade300),
-//   //         boxShadow: [
-//   //           BoxShadow(
-//   //             color: Colors.black12,
-//   //             blurRadius: 6,
-//   //             spreadRadius: 1,
-//   //             offset: Offset(0, 2),
-//   //           ),
-//   //         ],
-//   //       ),
-//   //       child: Column(
-//   //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//   //         children: [
-//   //           // Company name and logo
-//   //           Row(
-//   //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//   //             children: [
-//   //               Text(
-//   //                 'Ecobank',
-//   //                 style: TextStyle(
-//   //                   fontWeight: FontWeight.bold,
-//   //                   fontSize: 18,
-//   //                   color: Colors.green,
-//   //                 ),
-//   //               ),
-//   //             ],
-//   //           ),
-//   //           // User details
-//   //           Column(
-//   //             crossAxisAlignment: CrossAxisAlignment.start,
-//   //             children: [
-//   //               Text(
-//   //                 'Mr KOULOU',
-//   //                 style: TextStyle(
-//   //                   fontWeight: FontWeight.bold,
-//   //                   fontSize: 20,
-//   //                   color: Colors.black87,
-//   //                 ),
-//   //               ),
-//   //               Text(
-//   //                 'Chargé du Crédit Immobilier H/F',
-//   //                 style: TextStyle(
-//   //                   fontSize: 14,
-//   //                   color: Colors.grey,
-//   //                 ),
-//   //               ),
-//   //             ],
-//   //           ),
-//   //           // Contact info and QR code
-//   //           Row(
-//   //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//   //             children: [
-//   //               Column(
-//   //                 crossAxisAlignment: CrossAxisAlignment.start,
-//   //                 children: [
-//   //                   Text(
-//   //                     'exemple@gmail.com',
-//   //                     style: TextStyle(
-//   //                       fontSize: 14,
-//   //                       color: Colors.grey.shade700,
-//   //                     ),
-//   //                   ),
-//   //                   Text(
-//   //                     '+225 0000000000',
-//   //                     style: TextStyle(
-//   //                       fontSize: 14,
-//   //                       color: Colors.grey.shade700,
-//   //                     ),
-//   //                   ),
-//   //                 ],
-//   //               ),
-//   //               // QR code (dummy image for now)
-//   //               Container(
-//   //                 width: 50,
-//   //                 height: 50,
-//   //                 decoration: BoxDecoration(
-//   //                   color: Colors.grey.shade200,
-//   //                   borderRadius: BorderRadius.circular(8),
-//   //                 ),
-//   //                 child: Center(
-//   //                   child: Icon(
-//   //                     Icons.qr_code,
-//   //                     size: 40,
-//   //                     color: Colors.black87,
-//   //                   ),
-//   //                 ),
-//   //               ),
-//   //             ],
-//   //           ),
-//   //         ],
-//   //       ),
-//   //     ),
-//   //   );
-//   // }
-//
-//   Widget _buildBusinessQrCard() {
-//     return Center(
-//       child: Container(
-//         width: 300,
-//         height: 300,
-//           clipBehavior: Clip.hardEdge,
-//         padding: EdgeInsets.all(16),
-//         decoration: BoxDecoration(
-//           color: Colors.white,
-//           borderRadius: BorderRadius.circular(12),
-//           border: Border.all(color: Colors.grey.shade300),
-//           boxShadow: [
-//             BoxShadow(
-//               color: Colors.black12,
-//               blurRadius: 6,
-//               spreadRadius: 1,
-//               offset: Offset(0, 2),
-//             ),
-//           ],
-//         ),
-//         child:  Icon(
-//           Icons.qr_code,
-//           size: 240,
-//           color: Colors.black87,
-//         )
-//       ),
-//     );
-//   }
-//
-//   Widget _buildShareButton(BuildContext context) {
-//     return ElevatedButton(
-//       onPressed: () {
-//         // Handle QR code sharing
-//       },
-//       style: ElevatedButton.styleFrom(
-//         padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-//         backgroundColor: Colors.green,
-//         shape: RoundedRectangleBorder(
-//           borderRadius: BorderRadius.circular(8),
-//         ),
-//       ),
-//       child: Text(
-//         'Partager mon code Qr',
-//         style: TextStyle(
-//           fontSize: 16,
-//           color: Colors.white,
-//         ),
-//       ),
-//     );
-//   }
-//
-//   Widget _buildLinkCardButton(BuildContext context) {
-//     return OutlinedButton(
-//       onPressed: (){
-//         Navigator.of(context).pushNamed('/app/add_card');
-//       },
-//       style: OutlinedButton.styleFrom(
-//         padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-//         shape: RoundedRectangleBorder(
-//           borderRadius: BorderRadius.circular(8),
-//         ),
-//       ),
-//       child: Text(
-//         'Lier ma carte',
-//         style: TextStyle(
-//           fontSize: 16,
-//           color: Colors.grey.shade500,
-//         ),
-//       ),
-//     );
-//   }
-// }
-//
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:yecard/services/card_service.dart';
+import '../../../models/card_model.dart';
+import '../../../repositories/card_repository.dart';
+
+class BusinessCardScreen extends StatefulWidget {
+  const BusinessCardScreen({super.key});
+
+  @override
+  _BusinessCardScreenState createState() => _BusinessCardScreenState();
+}
+
+class _BusinessCardScreenState extends State<BusinessCardScreen> {
+  final CardRepository _cardRepository = CardRepository(CardService());
+  String? userQrData;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCardData();
+  }
+
+  Future<void> _fetchCardData() async {
+    try {
+      final response = await _cardRepository.getCard();
+      if (response['success']) {
+        final cardData = CardData.fromJson(response['data'][0]);
+        print("DATAGET ${response['data']}");
+        setState(() {
+          // userQrData = cardData.number;
+          userQrData = cardData.number.isNotEmpty ? cardData.number : "";
+        });
+      } else {
+        print("Error: ${response['message']}");
+      }
+    } catch (e) {
+      print("Error fetching card data: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Column(
+        children: [
+          const SizedBox(height: 50),
+          userQrData != null
+              ? _buildBusinessQrCard(userQrData!)
+              : const Center(child: Text("Vous n'avez pas encore de carte")),
+          const Spacer(),
+          _buildShareButton(context),
+          const SizedBox(height: 10),
+          if (userQrData == null)
+            _buildLinkCardButton(context),
+
+          const SizedBox(height: 50),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBusinessQrCard(String data) {
+    return Center(
+      child: Container(
+        width: 300,
+        height: 300,
+        clipBehavior: Clip.hardEdge,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 6,
+              spreadRadius: 1,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: QrImageView(
+          data: data,
+          version: QrVersions.auto,
+          size: 200.0,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShareButton(BuildContext context) {
+    return ElevatedButton(
+      onPressed: () {
+        // Handle QR code sharing
+      },
+      style: ElevatedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+        backgroundColor: Colors.green,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: const Text(
+        'Partager mon code Qr',
+        style: TextStyle(fontSize: 16, color: Colors.white),
+      ),
+    );
+  }
+
+  Widget _buildLinkCardButton(BuildContext context) {
+    return OutlinedButton(
+      onPressed: () {
+        Navigator.of(context).pushNamed('/app/add_card');
+      },
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Text(
+        'Lier ma carte',
+        style: TextStyle(fontSize: 16, color: Colors.grey.shade500),
+      ),
+    );
+  }
+}
+
 // class QrCodeScannerScreen extends StatefulWidget {
 //   @override
 //   _QrCodeScannerScreenState createState() => _QrCodeScannerScreenState();
@@ -208,7 +138,6 @@
 //     with SingleTickerProviderStateMixin {
 //   late TabController _tabController;
 //   Barcode? result;
-//   // final MobileScannerController controller = MobileScannerController();
 //   MobileScannerController controller = MobileScannerController();
 //
 //   @override
@@ -283,7 +212,6 @@
 //     );
 //   }
 //
-// // Widget qui intègre le scanner QR réel
 //   Widget _buildQrView(BuildContext context) {
 //     return MobileScanner(
 //       controller: controller,
@@ -292,21 +220,23 @@
 //         final barcode = barcodes.first;
 //
 //         if (barcode.rawValue != null) {
-//           // setResult(barcode.rawValue);
 //           setState(() {
-//             result = barcodes.first;
+//             result = barcode;
 //           });
-//           await controller
-//               .stop()
-//               .then((value) => controller.dispose())
-//               .then((value) =>  print("dsdcsdsdc"));
+//           await controller.stop().then((_) => controller.dispose()).then((_) {
+//             print("QR Code Detected: ${barcode.rawValue}");
+//
+//             Navigator.of(context).pushNamed('/app/contact_profile',
+//                 arguments: {
+//                 'id': barcode.rawValue,
+//
+//                 },
+//             );
+//           });
 //         }
 //       },
 //     );
-//
 //   }
-//
-//
 //
 //   @override
 //   void reassemble() {
@@ -316,110 +246,7 @@
 //     }
 //     controller.start();
 //   }
-//
-//
 // }
-
-
-
-import 'package:flutter/material.dart';
-import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:flutter/foundation.dart';
-import 'package:qr_flutter/qr_flutter.dart';  // Add QR package
-
-class BusinessCardScreen extends StatelessWidget {
-  final String userQrData = "12345678922";  // Example user data for QR code
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          SizedBox(height: 50),
-          _buildBusinessQrCard(userQrData),  // Pass user data to generate QR
-          Spacer(),
-          _buildShareButton(context),
-          SizedBox(height: 10),
-          _buildLinkCardButton(context),
-          SizedBox(height: 50),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBusinessQrCard(String data) {
-    return Center(
-      child: Container(
-        width: 300,
-        height: 300,
-        clipBehavior: Clip.hardEdge,
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.grey.shade300),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 6,
-              spreadRadius: 1,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: QrImageView(
-          data: '12345678901',
-          version: QrVersions.auto,
-          size: 200.0,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildShareButton(BuildContext context) {
-    return ElevatedButton(
-      onPressed: () {
-        // Handle QR code sharing
-      },
-      style: ElevatedButton.styleFrom(
-        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-        backgroundColor: Colors.green,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      child: Text(
-        'Partager mon code Qr',
-        style: TextStyle(
-          fontSize: 16,
-          color: Colors.white,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLinkCardButton(BuildContext context) {
-    return OutlinedButton(
-      onPressed: () {
-        Navigator.of(context).pushNamed('/app/add_card');
-      },
-      style: OutlinedButton.styleFrom(
-        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-      ),
-      child: Text(
-        'Lier ma carte',
-        style: TextStyle(
-          fontSize: 16,
-          color: Colors.grey.shade500,
-        ),
-      ),
-    );
-  }
-}
-
 class QrCodeScannerScreen extends StatefulWidget {
   @override
   _QrCodeScannerScreenState createState() => _QrCodeScannerScreenState();
@@ -435,6 +262,17 @@ class _QrCodeScannerScreenState extends State<QrCodeScannerScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+
+    // Ecouter les changements d'onglets
+    _tabController.addListener(() {
+      if (_tabController.index == 1) {
+        // Redémarrer le scanner lorsque l'onglet "Scanner un code" est actif
+        controller.start();
+      } else {
+        // Arrêter le scanner lorsque l'utilisateur quitte l'onglet de scan
+        controller.stop();
+      }
+    });
   }
 
   @override
@@ -465,7 +303,7 @@ class _QrCodeScannerScreenState extends State<QrCodeScannerScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
-          BusinessCardScreen(),
+          const BusinessCardScreen(),
           Column(
             children: [
               Expanded(
@@ -514,10 +352,13 @@ class _QrCodeScannerScreenState extends State<QrCodeScannerScreen>
           setState(() {
             result = barcode;
           });
-          await controller
-              .stop()
-              .then((value) => controller.dispose())
-              .then((value) => print("QR Code Detected: ${barcode.rawValue}"));
+          await controller.stop();  // Arrête le scanner après la détection d'un QR code
+          print("QR Code Detected: ${barcode.rawValue}");
+
+          Navigator.of(context).pushNamed('/app/contact_profile',
+              arguments: {
+                'id': barcode.rawValue,
+              });
         }
       },
     );
@@ -532,4 +373,3 @@ class _QrCodeScannerScreenState extends State<QrCodeScannerScreen>
     controller.start();
   }
 }
-

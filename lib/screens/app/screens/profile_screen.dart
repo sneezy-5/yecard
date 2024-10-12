@@ -7,6 +7,7 @@ import 'package:yecard/services/portfolio_service.dart';
 import '../../../bloc/profile_bloc.dart';
 import '../../../bloc/profile_event.dart';
 import '../../../bloc/profile_state.dart';
+import '../../../models/portfolio.dart';
 import '../../../models/profile_model.dart';
 import '../../../repositories/profile_repository.dart';
 import '../../../services/profile_service.dart';
@@ -28,6 +29,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
+  final PortfolioRepository _portfolioRepository = PortfolioRepository(PortfolioService());
   late TabController _tabController;
   int id = 0;
   bool _isOnPortfolioTab = false;
@@ -101,13 +103,19 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   @override
   Widget build(BuildContext context) {
     return BlocListener<ProfileBloc, ProfileState>(
-      listener: (context, state) {
+      listener: (context, state) async {
+        final responses = await _portfolioRepository.portfolio();
+        // final portfolioData = PortfolioData.fromJson(responses["data"]);
+
         if (state is ProfileLoaded) {
           _fillProfileData(state.profileData );
           setState(() {
+
+            if (responses['success']) {
+              portfolioItems = responses['data'];
+            }
             isLoading = false;
             id = state.profileData.id;
-            print("PROFILELLE${state.portfolioData}");
           });
         }
         if (state is PortfolioLoaded) {
@@ -186,7 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             Column(
               children: [
                 Container(
-                  height: 200,
+                  height: 130,
                   child: Stack(
                     children: [
                       Positioned(
@@ -212,7 +220,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                             children: [
                               Text(
                                 _nameController.text,
-                                style: TextStyle(
+                                style: const TextStyle(
                                   fontSize: 20,
                                   color: Colors.black,
                                   fontWeight: FontWeight.w500,
@@ -303,6 +311,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           // Similar sections for other fields...
           _buildFieldWithLabel(Icons.label,'Nom', _nameController),
           _buildFieldWithLabel(Icons.mail_outline,'Email', _emailController),
+          _buildFieldWithLabel(Icons.work,'Fonction', _fonctionController),
           _buildFieldWithLabel(Icons.phone,'Phone', _phoneController),
           _buildFieldWithLabel(Icons.label,'Portfolio Site', _siteController),
           _buildFieldWithLabel(Icons.house,'Domicile', _domicileController),
@@ -344,7 +353,18 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           final item = portfolioItems[index];
           return GestureDetector(
             onTap: () {
-              Navigator.of(context).pushNamed('/app/portfolio_detail');
+              // Navigator.of(context).pushNamed('/app/portfolio_detail');
+              Navigator.of(context).pushNamed(
+                '/app/portfolio_detail',
+                arguments: {
+                  'title': item['title'],
+                  'description': item['description'],
+                  'file_1': item['file_1'],
+                  'file_2': item['file_2'],
+                  'file_3': item['file_3']
+                },
+              );
+
             },
             child: Card(
               elevation: 2,
@@ -352,7 +372,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.image, size: 50, color: Colors.grey),
+              Image.network(item['file_1']),
+                  // Icon(Icons.image, size: 50, color: Colors.grey),
                   SizedBox(height: 10),
                   Text(
                     item['title'] ?? 'Item ${index + 1}',
@@ -386,17 +407,19 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   void _fillProfileData(ProfileData profileData) {
-    _nameController.text = profileData.name;
-    _fonctionController.text = profileData.fonction;
-    _entrepriseController.text = profileData.entreprise;
-    _biographieController.text = profileData.biographie;
-    _phoneController.text = profileData.phone;
-    _emailController.text = profileData.email;
-    _localisationController.text = profileData.localisation;
-    _profileImageController.text = profileData.profile_image;
-    _bannerImageController.text = profileData.banier;
-
+    _nameController.text = profileData.name ?? ''; // Default to empty string if null
+    _fonctionController.text = profileData.fonction ?? '';
+    _entrepriseController.text = profileData.entreprise ?? '';
+    _biographieController.text = profileData.biographie ?? '';
+    _phoneController.text = profileData.phone ?? '';
+    _emailController.text = profileData.email ?? '';
+    _localisationController.text = profileData.localisation ?? '';
+    _profileImageController.text = profileData.profile_image ?? '';
+    _bannerImageController.text = profileData.banier ?? '';
+    _domicileController.text = profileData.address ?? '';
+    _siteController.text = profileData.site_url ?? '';
   }
+
 
   void _saveProfile() {
     final updatedProfile = ProfileData(
@@ -408,6 +431,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       phone: _phoneController.text,
       email: _emailController.text,
       localisation: _localisationController.text,
+      address: _domicileController.text,
+      site_url: _siteController.text,
       profile_image: '',
       banier: '',
     );
@@ -419,7 +444,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     ));
 
     setState(() {
-      _isEditing = false;
+      _isEditing != _isEditing;
     });
   }
 }

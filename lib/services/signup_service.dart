@@ -41,7 +41,8 @@ import '../models/signup_model.dart';
 
 class SignupService {
   // final String _baseUrl = 'https://yecard.pro';
-  final String _baseUrl = 'http://192.168.1.37:8000';
+  final String _baseUrl = 'http://192.168.145.199:8000';
+
 
   Future<Map<String, dynamic>> signup(SignupData signupData) async {
     print("DATA ${signupData.toJson()}");
@@ -51,8 +52,9 @@ class SignupService {
       final response = await http.post(
         Uri.parse('$_baseUrl/api/v0/user/account/register/'),
         headers: {
-          'Content-Type': 'application/json',
-        },
+          'Content-Type': 'application/json; charset=utf-8',
+
+      },
         body: jsonEncode(signupData.toJson()),
       );
 

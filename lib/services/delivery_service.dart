@@ -6,7 +6,7 @@ import '../models/delivery_zone.dart';
 
 class DeliveryService {
   // final String _baseUrl = 'https://yecard.pro';
-  final String _baseUrl = 'http://192.168.1.37:8000';
+  final String _baseUrl = 'http://192.168.145.199:8000';
 
   Future<Map<String, dynamic>> addDelivery(DeliveryZone deliveryData) async {
     print("DATA ${deliveryData.toJson()}");
@@ -21,7 +21,7 @@ class DeliveryService {
       final response = await http.post(
         Uri.parse('$_baseUrl/api/v0/order/'),
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
         },
         body: jsonEncode(deliveryData.toJson()),

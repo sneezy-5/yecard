@@ -5,30 +5,31 @@ part 'profile_model.g.dart';
 @JsonSerializable()
 class ProfileData {
   final int id;
-  final String name;
-  final String fonction;
-  final String entreprise;
-  final String biographie;
-  final String phone;
-  final String email;
-  final String localisation;
-  final String profile_image;
-  final String banier;
+  final String? name;
+  final String? fonction;
+  final String? entreprise;
+  final String? biographie;
+  final String? phone;
+  final String? email;
+  final String? address;
+  final String? site_url;
+  final String? localisation;
+  final String? profile_image;
+  final String? banier;
 
   ProfileData({
     required this.id,
-    required this.name,
-    required this.fonction,
-    required this.entreprise,
-    required this.biographie,
-    required this.phone,
-    required this.email,
-    required this.localisation,
-    required this.profile_image,
-    required this.banier
-
-
-
+    this.name,
+    this.fonction,
+    this.entreprise,
+    this.biographie,
+    this.address,
+    this.site_url,
+    this.phone,
+    this.email,
+    this.localisation,
+    this.profile_image,
+    this.banier,
   });
 
   factory ProfileData.fromJson(Map<String, dynamic> json) => _$ProfileDataFromJson(json);
