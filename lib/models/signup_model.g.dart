@@ -17,7 +17,6 @@ SignupData _$SignupDataFromJson(Map<String, dynamic> json) => SignupData(
       hasCard: json['hasCard'] as bool,
       cardNumber: json['cardNumber'] as String,
       password: json['password'] as String,
-      username: json['username'] as String,
     );
 
 Map<String, dynamic> _$SignupDataToJson(SignupData instance) =>
@@ -32,5 +31,4 @@ Map<String, dynamic> _$SignupDataToJson(SignupData instance) =>
       'hasCard': instance.hasCard,
       'cardNumber': instance.cardNumber,
       'password': instance.password,
-      'username': instance.username,
     };

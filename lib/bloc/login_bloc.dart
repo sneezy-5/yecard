@@ -9,6 +9,9 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc(this._loginRepository) : super(LoginState()) {
 
     on<SubmitLogin>(_onSubmitLogin);
+    on<ClearError>((event, emit) {
+      emit(state.copyWith(errorMessage: ''));
+    });
   }
 
   void _onSubmitLogin(SubmitLogin event, Emitter<LoginState> emit) async {

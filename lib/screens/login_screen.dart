@@ -40,7 +40,7 @@ class LoginScreenWiev extends StatelessWidget  {
             listener: (context, state) {
               if (state.isSuccess) {
                 AppRoutes.pushReplacement(context, AppRoutes.appHome);
-              } else if (state.errorMessage.isNotEmpty) {
+              } else if (state.errorMessage.isNotEmpty && !state.isSuccess) {
                 final errorMessage = state.errorMessage;
 
                 ScaffoldMessenger.of(context).showSnackBar(

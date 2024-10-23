@@ -140,7 +140,6 @@ class ProfileService {
       request.fields['biographie'] = updateData.biographie ?? '';
       request.fields['email'] = updateData.email ?? '';
       request.fields['localisation'] = updateData.localisation ?? '';
-      request.fields['address'] = updateData.address ?? '';
       request.fields['site_url'] = updateData.site_url ?? '';
 
 

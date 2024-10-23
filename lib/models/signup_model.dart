@@ -14,7 +14,6 @@ class SignupData {
   final bool hasCard;
   final String cardNumber;
   final String password;
-  final String username;
 
   SignupData({
     required this.name,
@@ -27,7 +26,6 @@ class SignupData {
     required this.hasCard,
     required this.cardNumber,
     required this.password,
-    required this.username
 
   });
 

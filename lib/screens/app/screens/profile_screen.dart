@@ -59,7 +59,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _tabController = TabController(length: 2, vsync: this);
     _profileBloc = BlocProvider.of<ProfileBloc>(context);
     _profileBloc.add(FetchProfile());
-    // _profileBloc.add(FetchPortfolio());
     _tabController.addListener(() {
       setState(() {
         _isOnPortfolioTab = _tabController.index == 1;
@@ -194,7 +193,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             Column(
               children: [
                 Container(
-                  height: 130,
+                  height: 200,
                   child: Stack(
                     children: [
                       Positioned(
@@ -214,6 +213,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                         bottom: 0,
                         left: 0,
                         right: 0,
+                        top: 150,
                         child: Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -255,16 +255,16 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                           Tab(text: 'Portfolio'),
                         ],
                       ),
-                      Container(
-                        height: MediaQuery.of(context).size.height * 0.6,
-                        child: TabBarView(
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.5,
+                    child:  TabBarView(
                           controller: _tabController,
                           children: [
                             _buildAboutTab(),
                             _buildPortfolioTab(),
                           ],
                         ),
-                      ),
+                  ),
                     ],
                   ),
                 ),
@@ -314,7 +314,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           _buildFieldWithLabel(Icons.work,'Fonction', _fonctionController),
           _buildFieldWithLabel(Icons.phone,'Phone', _phoneController),
           _buildFieldWithLabel(Icons.label,'Portfolio Site', _siteController),
-          _buildFieldWithLabel(Icons.house,'Domicile', _domicileController),
+          _buildFieldWithLabel(Icons.house,'Domicile', _localisationController),
+          SizedBox(height: 300),
         ],
       ),
     );
@@ -416,7 +417,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _localisationController.text = profileData.localisation ?? '';
     _profileImageController.text = profileData.profile_image ?? '';
     _bannerImageController.text = profileData.banier ?? '';
-    _domicileController.text = profileData.address ?? '';
     _siteController.text = profileData.site_url ?? '';
   }
 
@@ -431,7 +431,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       phone: _phoneController.text,
       email: _emailController.text,
       localisation: _localisationController.text,
-      address: _domicileController.text,
       site_url: _siteController.text,
       profile_image: '',
       banier: '',

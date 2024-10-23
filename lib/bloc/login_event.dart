@@ -14,3 +14,5 @@ class SubmitLogin extends LoginEvent {
   @override
   List<Object> get props => [loginModelData];
 }
+
+class ClearError extends LoginEvent {}

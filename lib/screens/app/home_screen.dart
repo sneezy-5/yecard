@@ -24,8 +24,7 @@ class _HomePageState extends State<HomePage> {
   create: (context) => ProfileBloc(ProfileRepository(ProfileService()), PortfolioRepository(PortfolioService())),
   child: CardScreen(),
   ),
-    // CardScreen(),
-    // ContactsScreen(),
+    ContactsScreen(),
     QrCodeScannerScreen()
   ];
 
@@ -42,22 +41,17 @@ class _HomePageState extends State<HomePage> {
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
-            icon:  Padding(
-              padding: const EdgeInsets.only(left: 50.0),
-              child: Icon(Icons.credit_card_outlined, size: 50),
-            ),
+            icon:Icon(Icons.home, size: 30),
+
             label: 'Card',
           ),
-          // BottomNavigationBarItem(
-          //   icon: Icon(Icons.person_2_outlined),
-          //   label: 'Contacts',
-          // ),
+          BottomNavigationBarItem(
+            icon:  Icon(Icons.person, size: 30),
+            label: 'Contacts',
+          ),
           BottomNavigationBarItem(
 
-            icon: Padding(
-            padding: const EdgeInsets.only(right: 50.0),
-              child: Icon(Icons.qr_code, size: 50,),
-            ),
+            icon: Icon(Icons.qr_code, size: 30,),
             label: 'QR Code',
           ),
 

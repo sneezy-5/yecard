@@ -1,13 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:yecard/repositories/portfolio_repository.dart';
 import 'package:yecard/services/portfolio_service.dart';
-import '../../../models/portfolio.dart';
+import '../../../models/contact_model.dart';
 import '../../../models/profile_model.dart';
 import '../../../repositories/profile_repository.dart';
-import '../../../routes.dart';
+import '../../../services/contact_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/popup_widgets.dart';
@@ -26,6 +25,8 @@ class _CProfileScreenState extends State<ContactProfileWiew>
     with SingleTickerProviderStateMixin {
   final PortfolioRepository _portfolioRepository = PortfolioRepository(PortfolioService());
   final ProfileRepository _profileRepository = ProfileRepository(ProfileService());
+  ContactService contactService = ContactService();
+
   final Map<String, dynamic>? args;
 
   _CProfileScreenState({Key? key, required this.args});
@@ -45,13 +46,12 @@ class _CProfileScreenState extends State<ContactProfileWiew>
   final _entrepriseController = TextEditingController();
   final _biographieController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _domicileController = TextEditingController();
   final _siteController = TextEditingController();
   final _emailController = TextEditingController();
   final _localisationController = TextEditingController();
   final _profileImageController = TextEditingController();
   final _bannerImageController = TextEditingController();
-
+ late int id;
   @override
   void initState() {
     super.initState();
@@ -80,9 +80,16 @@ class _CProfileScreenState extends State<ContactProfileWiew>
         //   }
         //
         //
+
+
+
+
+
+
         // }
         if (profileResponse['success'] ) {
           final profileData = ProfileData.fromJson(profileResponse['data']);
+          id = profileData.id;
           _fillProfileData(profileData);
         } else {
           // Si les données du profil sont vides, afficher un popup
@@ -122,26 +129,12 @@ class _CProfileScreenState extends State<ContactProfileWiew>
     _emailController.dispose();
     _localisationController.dispose();
     _siteController.dispose();
-    _domicileController.dispose();
     _profileImageController.dispose();
     _bannerImageController.dispose();
     super.dispose();
   }
 
-  Future<void> _pickImage(bool isProfileImage) async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      setState(() {
-        if (isProfileImage) {
-          _selectedProfileImage = File(pickedFile.path);
-        } else {
-          _selectedBannerImage = File(pickedFile.path);
-        }
-        _saveProfile();
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -183,7 +176,7 @@ class _CProfileScreenState extends State<ContactProfileWiew>
                       ],
                     ),
                     SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.6,
+                      height: MediaQuery.of(context).size.height * 0.5,
                       child: TabBarView(
                         controller: _tabController,
                         children: [
@@ -206,7 +199,7 @@ class _CProfileScreenState extends State<ContactProfileWiew>
     return Stack(
       children: [
         GestureDetector(
-          onTap: () => _pickImage(false),
+          onTap: () => {},
           child: Container(
             width: double.infinity,
             height: 100,
@@ -221,30 +214,21 @@ class _CProfileScreenState extends State<ContactProfileWiew>
             ),
           ),
         ),
-        Positioned(
-          right: 8,
-          bottom: 0,
-          child: IconButton(
-            icon: const Icon(Icons.edit, color: Colors.white),
-            onPressed: () {
-              _pickImage(false);
-            },
-          ),
-        ),
+
       ],
     );
   }
 
   Widget _buildProfileImage() {
     return Container(
-      height: 130,
+      height: 200,
       child: Stack(
         children: [
           Positioned(
             top: 50,
             left: MediaQuery.of(context).size.width / 2 - 50,
             child: GestureDetector(
-              onTap: () => _pickImage(true),
+              onTap: () => {},
               child: CircleAvatar(
                 radius: 50,
                 backgroundImage: _selectedProfileImage == null
@@ -257,6 +241,7 @@ class _CProfileScreenState extends State<ContactProfileWiew>
             bottom: 0,
             left: 0,
             right: 0,
+            top: 150,
             child: Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -290,25 +275,14 @@ class _CProfileScreenState extends State<ContactProfileWiew>
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+               Text(
                 'Biographie',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    _isEditing = !_isEditing;
-                  });
-                  if (!_isEditing) {
-                    _saveProfile();
-                  }
-                },
-                icon: Icon(_isEditing ? Icons.check : Icons.edit),
-                tooltip: _isEditing ? 'Save' : 'Edit',
-              ),
+
             ],
           ),
           const SizedBox(height: 10),
@@ -320,7 +294,8 @@ class _CProfileScreenState extends State<ContactProfileWiew>
           _buildFieldWithLabel(Icons.mail_outline, 'Email', _emailController),
           _buildFieldWithLabel(Icons.phone, 'Phone', _phoneController),
           _buildFieldWithLabel(Icons.label, 'Portfolio Site', _siteController),
-          _buildFieldWithLabel(Icons.house, 'Domicile', _domicileController),
+          _buildFieldWithLabel(Icons.house, 'Domicile', _localisationController),
+
           ElevatedButton(
             onPressed: _saveProfileAsContact,
             child: const Text('Enregistrer sur le téléphone',
@@ -328,6 +303,20 @@ class _CProfileScreenState extends State<ContactProfileWiew>
               color: Colors.blue
             ),),
           ),
+          ElevatedButton(
+            onPressed: () {
+              ContactData contactData = ContactData(
+                from_user: 1,
+                to_user: id
+              );
+          contactService.addContact(contactData);
+            },
+            child: const Text('Enregistrer sur la l\'appliaction',
+              style: TextStyle(
+                  color: Colors.blue
+              ),),
+          ),
+          SizedBox(height: 50),
         ],
       ),
     );
@@ -426,47 +415,40 @@ class _CProfileScreenState extends State<ContactProfileWiew>
     _localisationController.text = profileData.localisation ?? '';
     _profileImageController.text = profileData.profile_image ?? '';
     _bannerImageController.text = profileData.banier ?? '';
-    _domicileController.text = profileData.address ?? '';
     _siteController.text = profileData.site_url ?? '';
   }
 
 
-  void _saveProfile() {
-    final updatedProfile = ProfileData(
-      id: 0, // Replace with the correct ID
-      name: _nameController.text,
-      fonction: _fonctionController.text,
-      entreprise: _entrepriseController.text,
-      biographie: _biographieController.text,
-      phone: _phoneController.text,
-      email: _emailController.text,
-      localisation: _localisationController.text,
-      address: _domicileController.text,
-      site_url: _siteController.text,
-      profile_image: '',
-      banier: '',
-    );
-
-    // Save profile using updated data
-    // Call API or handle saving logic
-    setState(() {
-      _isEditing = false;
-    });
-  }
 
   Future<void> _saveProfileAsContact() async {
     if (await FlutterContacts.requestPermission()) {
+      // Create a new contact with full details
       final newContact = Contact(
         name: Name(first: _nameController.text),
         phones: [Phone(_phoneController.text)],
         emails: [Email(_emailController.text)],
-        // company: _entrepriseController.text,
-        // jobTitle: _fonctionController.text,
-        // addresses: [Address(address: _domicileController.text)],
+        organizations: [
+          Organization(
+            company: _entrepriseController.text, // Company name
+            title: _fonctionController.text,     // Job title
+          )
+        ],
+        addresses: [
+          Address(
+            _localisationController.text,
+            label: AddressLabel.home, // Address label (optional)
+            street: '',
+            city: 'Abidjan',         // City (example)
+            state: '', // State (example)
+            postalCode: '',    // Postal code (example)
+            country: "Cote d'Ivoire",      // Country (example)
+          )
+        ],
         websites: [Website(_siteController.text)],
       );
 
       try {
+        // Save the contact to the phone's contact list
         await FlutterContacts.insertContact(newContact);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Contact enregistré avec succès')),
@@ -478,4 +460,6 @@ class _CProfileScreenState extends State<ContactProfileWiew>
       }
     }
   }
+
+
 }

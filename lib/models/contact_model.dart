@@ -4,8 +4,8 @@ part 'contact_model.g.dart';
 
 @JsonSerializable()
 class ContactData {
-  final String from_user;
-  final String to_user;
+  final int from_user;
+  final int to_user;
 
   ContactData({
     required this.from_user,

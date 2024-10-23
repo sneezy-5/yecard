@@ -11,7 +11,6 @@ class ProfileData {
   final String? biographie;
   final String? phone;
   final String? email;
-  final String? address;
   final String? site_url;
   final String? localisation;
   final String? profile_image;
@@ -23,7 +22,6 @@ class ProfileData {
     this.fonction,
     this.entreprise,
     this.biographie,
-    this.address,
     this.site_url,
     this.phone,
     this.email,

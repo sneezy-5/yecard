@@ -7,8 +7,8 @@ part of 'contact_model.dart';
 // **************************************************************************
 
 ContactData _$ContactDataFromJson(Map<String, dynamic> json) => ContactData(
-      from_user: json['from_user'] as String,
-      to_user: json['to_user'] as String,
+      from_user: json['from_user'] as int,
+      to_user: json['to_user'] as int,
     );
 
 Map<String, dynamic> _$ContactDataToJson(ContactData instance) =>

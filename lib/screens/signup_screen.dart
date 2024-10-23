@@ -54,17 +54,31 @@ class SignupView extends StatelessWidget {
               showDialog(
                 context: context,
                 builder: (BuildContext context) {
-                  return CustomPopup(
-                    title: 'Succès',
-                    content: "Votre carte numéroté 123 456 789 123 à été lier a votre compte avec succès vous pouvez bénéficier de tous les avantage de notre service.",
-                    buttonText: 'ok',
-                    onButtonPressed: () {
-                      Navigator.of(context).pop();
-                      AppRoutes.pushReplacement(context, AppRoutes.createPassword);
-                    },
-                  );
+                  // Check if the cardNumberController has some text
+                  if (cardNumberController.text.isNotEmpty) {
+                    return CustomPopup(
+                      title: 'Succès',
+                      content: "Votre carte numéroté ${cardNumberController.text} a été liée à votre compte avec succès. Vous pouvez bénéficier de tous les avantages de notre service.",
+                      buttonText: 'OK',
+                      onButtonPressed: () {
+                        Navigator.of(context).pop();
+                        AppRoutes.pushReplacement(context, AppRoutes.createPassword);
+                      },
+                    );
+                  } else {
+                    return CustomPopup(
+                      title: 'Succès',
+                      content: "Votre compte a été créé avec succès.",
+                      buttonText: 'OK',
+                      onButtonPressed: () {
+                        Navigator.of(context).pop();
+                        AppRoutes.pushReplacement(context, AppRoutes.createPassword);
+                      },
+                    );
+                  }
                 },
               );
+
             } else if (state.errorMessages.isNotEmpty) {
               final errorMessage = state.errorMessages.entries
                   .map((entry) => '${entry.key}: ${entry.value.join(', ')}')
@@ -328,7 +342,6 @@ class SignupView extends StatelessWidget {
                       hasCard: hasCard,
                       cardNumber: cardNumber,
                       password: 'password',
-                      username: name + function,
                     );
 
                     context.read<SignupBloc>().add(SubmitSignup(signupData));
