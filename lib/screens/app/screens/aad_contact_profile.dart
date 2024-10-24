@@ -13,17 +13,17 @@ import '../../../services/user_preference.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/popup_widgets.dart';
 
-class ContactProfileWiew extends StatefulWidget {
+class AddContactProfileWiew extends StatefulWidget {
   final Map<String, dynamic>? args;
 
   // Constructor to retrieve args
-  const ContactProfileWiew({Key? key, required this.args}) : super(key: key);
+  const AddContactProfileWiew({Key? key, required this.args}) : super(key: key);
 
   @override
   _CProfileScreenState createState() => _CProfileScreenState(args: args);
 }
 
-class _CProfileScreenState extends State<ContactProfileWiew>
+class _CProfileScreenState extends State<AddContactProfileWiew>
     with SingleTickerProviderStateMixin {
   final PortfolioRepository _portfolioRepository = PortfolioRepository(PortfolioService());
   final ProfileRepository _profileRepository = ProfileRepository(ProfileService());
@@ -47,6 +47,7 @@ class _CProfileScreenState extends State<ContactProfileWiew>
   List<dynamic> portfolioItems = [];
   bool _isEditing = false;
   bool isLoading = true;
+  bool _isSaving = false;
 
   File? _selectedProfileImage;
   File? _selectedBannerImage;
@@ -64,6 +65,7 @@ class _CProfileScreenState extends State<ContactProfileWiew>
   final _facebookController = TextEditingController();
   final _whatsappController = TextEditingController();
   final _linkedinController = TextEditingController();
+
  late int id;
   @override
   void initState() {
@@ -80,48 +82,31 @@ class _CProfileScreenState extends State<ContactProfileWiew>
 
   Future<void> _fetchData() async {
     try {
-      // final portfolioResponse = await _portfolioRepository.getContactPortfolio((args?['id']));
-      final profileResponse = await _profileRepository.contact(args?['id']);
+      final portfolioResponse = await _portfolioRepository.getContactPortfolio(args?['id']);
+      final profileResponse = await _profileRepository.contactProfile(args?['id']);
 
       setState(() {
-        print("PROFILEEA:${profileResponse }");
-        print("PROFILEEE:${args?['id'] }");
-        // print("PORTFOLIO:${portfolioResponse }");
-        // if (portfolioResponse['success']) {
-        //   if (portfolioResponse['data']){
-        //     // final protfolioData = PortfolioData.fromJson(portfolioResponse['data']);
-        //     portfolioItems = portfolioResponse['data'];
-        //   }
-        //
-        //
+        print("PROFILE: $profileResponse");
+        print("PORTFOLIO: $portfolioResponse");
 
+        // Handling portfolio response
+        if (portfolioResponse != null && portfolioResponse['success']) {
+          if (portfolioResponse['data'] != null) {
+            // Process portfolio data here
+            // Example: portfolioItems = portfolioResponse['data'];
+          }
+        }
 
-
-
-
-
-        // }
-        if (profileResponse['success'] ) {
+        // Handling profile response
+        if (profileResponse != null && profileResponse['success']) {
           final profileData = ProfileData.fromJson(profileResponse['data']);
           id = profileData.id;
           _fillProfileData(profileData);
         } else {
-
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return CustomPopup(
-                title: 'Succès',
-                content: "Utilisateur introuvable",
-                buttonText: 'ok',
-                onButtonPressed: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pop();
-                },
-              );
-            },
-          );
+          // If profile data is empty, display a popup
+          _showUserNotFoundPopup();
         }
+
         isLoading = false;
       });
     } catch (e) {
@@ -130,6 +115,23 @@ class _CProfileScreenState extends State<ContactProfileWiew>
         isLoading = false;
       });
     }
+  }
+
+  void _showUserNotFoundPopup() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return CustomPopup(
+          title: 'Erreur',
+          content: 'Utilisateur introuvable',
+          buttonText: 'Ok',
+          onButtonPressed: () {
+            Navigator.of(context).pop(); // Close the popup
+            Navigator.of(context).pop(); // Navigate back
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -163,55 +165,49 @@ class _CProfileScreenState extends State<ContactProfileWiew>
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
-    padding: EdgeInsets.zero,
+          : Stack(
         children: [
-          Stack(
+          Column(
             children: [
-              Column(
-                children: [
-                  _buildBannerImage(),
-                ],
-              ),
-              Column(
-                children: [
-                  _buildProfileImage(),
-                  DefaultTabController(
-                    length: 2,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TabBar(
-                          controller: _tabController,
-                          indicatorColor: Colors.green,
-                          labelColor: Colors.black,
-                          unselectedLabelColor: Colors.grey,
-                          indicatorSize: TabBarIndicatorSize.tab,
-                          tabs: const [
-                            Tab(text: 'About'),
-                            Tab(text: 'Portfolio'),
-                          ],
-                        ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.6,
-                          child: TabBarView(
-                            controller: _tabController,
-                            children: [
-                              _buildAboutTab(),
-                              _buildPortfolioTab(),
-                            ],
-                          ),
-                        ),
+              _buildBannerImage(),
+            ],
+          ),
+          Column(
+            children: [
+              _buildProfileImage(),
+              DefaultTabController(
+                length: 2,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TabBar(
+                      controller: _tabController,
+                      indicatorColor: Colors.green,
+                      labelColor: Colors.black,
+                      unselectedLabelColor: Colors.grey,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      tabs: const [
+                        Tab(text: 'About'),
+                        Tab(text: 'Portfolio'),
                       ],
                     ),
-                  ),
-                ],
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.5,
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          _buildAboutTab(),
+                          _buildPortfolioTab(),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
-          )
+          ),
         ],
-      )
-,
+      ),
     );
   }
 
@@ -307,7 +303,7 @@ class _CProfileScreenState extends State<ContactProfileWiew>
             ],
           ),
           SizedBox(height: 10),
-               _buildReadOnlyTextField(_biographieController.text),
+          _buildReadOnlyTextField(_biographieController.text),
 
           // Autres champs (Nom, Email, Fonction, etc.)
           _buildFieldWithLabel(Icons.label, 'Nom', _nameController),
@@ -336,7 +332,86 @@ class _CProfileScreenState extends State<ContactProfileWiew>
           _buildSocialMediaField(FontAwesomeIcons.whatsapp, 'WhatsApp', _whatsappController),
           // LinkedIn
           _buildSocialMediaField(FontAwesomeIcons.linkedin, 'LinkedIn', _linkedinController),
-          SizedBox(height: 60),
+          SizedBox(height: 10),
+          // Boutons d'enregistrement
+          _isSaving
+              ? Center(child: CircularProgressIndicator()) // Affiche un indicateur de chargement
+              : ElevatedButton(
+            onPressed: _saveProfileAsContact,
+            child: Text("Enregistrer sur le téléphone"),
+          ),
+
+          ElevatedButton(
+            onPressed: () {
+              final userId = int.tryParse(userInfo?['id'] ?? '');
+
+              ContactData contactdata = ContactData(from_user: 1, to_user: id);
+              contactService.addContact(contactdata);
+            },
+            child: Text("Enregistrer dans l'application"),
+          ),
+
+          // ElevatedButton(onPressed: _saveProfileAsContact, child: Text("Enregistrer sur le telphone")),
+          // ElevatedButton(onPressed: () {
+          //   final userId = int.tryParse(userInfo?['id'] ?? '');
+          //
+          //   ContactData contactdata = ContactData(from_user: userId, to_user: id) ;
+          //   contactService.addContact(contactdata);
+          // }, child: Text("Enregistrer dans lapplication")),
+          SizedBox(height: 10),
+        ],
+      ),
+    );
+  }
+  Widget _buildFieldWithLabel(IconData icon, String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0), // Add some vertical padding
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 30),
+          SizedBox(width: 10), // Add a little space between the icon and text field
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                _isEditing
+                    ? _buildEditableTextField(controller, 1)
+                    : _buildReadOnlyTextField(controller.text),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSocialMediaField(IconData icon, String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0), // Add some vertical padding
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 30),
+          SizedBox(width: 10), // Space between icon and text
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                _isEditing
+                    ? _buildEditableTextField(controller, 1)
+                    : _buildReadOnlyTextField(controller.text),
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -390,53 +465,17 @@ class _CProfileScreenState extends State<ContactProfileWiew>
       ),
     );
   }
-  Widget _buildSocialMediaField(IconData icon, String label, TextEditingController controller) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0), // Add some vertical padding
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 30),
-          SizedBox(width: 10), // Space between icon and text
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
 
-                     _buildReadOnlyTextField(controller.text),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  Widget _buildFieldWithLabel(IconData icon, String label, TextEditingController controller) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0), // Add some vertical padding
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 30),
-          SizedBox(width: 10), // Add a little space between the icon and text field
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-
-                 _buildReadOnlyTextField(controller.text),
-              ],
-            ),
-          ),
-        ],
+  Widget _buildEditableTextField(TextEditingController controller, int maxLines) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      decoration: const InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        border: UnderlineInputBorder(),
+        hintText: 'Edit text',
+        hintStyle: TextStyle(color: Colors.grey),
       ),
     );
   }
@@ -445,9 +484,8 @@ class _CProfileScreenState extends State<ContactProfileWiew>
     return Text(text.isNotEmpty ? text : 'Non spécifié');
   }
 
-
   void _fillProfileData(ProfileData profileData) {
-    _nameController.text = profileData.name ?? ''; // Default to empty string if null
+    _nameController.text = profileData.name ?? '';
     _fonctionController.text = profileData.fonction ?? '';
     _entrepriseController.text = profileData.entreprise ?? '';
     _biographieController.text = profileData.biographie ?? '';
@@ -464,5 +502,99 @@ class _CProfileScreenState extends State<ContactProfileWiew>
 
 
 
+  // Future<void> _saveProfileAsContact() async {
+  //   if (await FlutterContacts.requestPermission()) {
+  //     // Create a new contact with full details
+  //     final newContact = Contact(
+  //       name: Name(first: _nameController.text),
+  //       phones: [Phone(_phoneController.text)],
+  //       emails: [Email(_emailController.text)],
+  //       organizations: [
+  //         Organization(
+  //           company: _entrepriseController.text, // Company name
+  //           title: _fonctionController.text,     // Job title
+  //         )
+  //       ],
+  //       addresses: [
+  //         Address(
+  //           _localisationController.text,
+  //           label: AddressLabel.home, // Address label (optional)
+  //           street: '',
+  //           city: 'Abidjan',         // City (example)
+  //           state: '', // State (example)
+  //           postalCode: '',    // Postal code (example)
+  //           country: "Cote d'Ivoire",      // Country (example)
+  //         )
+  //       ],
+  //       websites: [Website(_siteController.text)],
+  //     );
+  //
+  //     try {
+  //       // Save the contact to the phone's contact list
+  //       await FlutterContacts.insertContact(newContact);
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Contact enregistré avec succès')),
+  //       );
+  //     } catch (e) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Erreur lors de l\'enregistrement du contact')),
+  //       );
+  //     }
+  //   }
+  // }
+
+  Future<void> _saveProfileAsContact() async {
+    if (await FlutterContacts.requestPermission()) {
+      // Créer un nouveau contact avec toutes les informations
+      final newContact = Contact(
+        name: Name(first: _nameController.text),
+        phones: [Phone(_phoneController.text)],
+        emails: [Email(_emailController.text)],
+        organizations: [
+          Organization(
+            company: _entrepriseController.text, // Nom de l'entreprise
+            title: _fonctionController.text,      // Titre du poste
+          )
+        ],
+        addresses: [
+          Address(
+            _localisationController.text,
+            label: AddressLabel.home,
+          )
+        ],
+        websites: [Website(_siteController.text)],
+        socialMedias: [
+          // SocialMedia(
+          //   type: FontAwesomeIcons.facebook,
+          //   userName: _facebookController.text, // Use .text to get the string value
+          // ),
+          // SocialMedia(
+          //   type: FontAwesomeIcons.whatsapp,
+          //   userName: _whatsappController.text, // Use .text to get the string value
+          // ),
+        ],
+      );
+
+      // Ajouter une photo
+      if (_selectedProfileImage != null) {
+        // Convertir l'image en bytes
+        final bytes = await _selectedProfileImage!.readAsBytes();
+        newContact.photo = bytes; // Attribuer les bytes de l'image au contact
+      }
+
+      try {
+        // Enregistrer le contact dans la liste de contacts du téléphone
+        await FlutterContacts.insertContact(newContact);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Contact enregistré avec succès')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors de l\'enregistrement du contact')),
+        );
+      }
+    }
+  }
 
 }
+

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yecard/repositories/delivery_repository.dart';
+
 import 'package:yecard/screens/app/home_screen.dart';
+import 'package:yecard/screens/app/screens/aad_contact_profile.dart';
 import 'package:yecard/screens/app/screens/add_card.dart';
 import 'package:yecard/screens/app/screens/add_portfolio.dart';
 import 'package:yecard/screens/app/screens/card_order.dart';
@@ -30,7 +30,9 @@ class AppRoutes {
   static const String appAddPortfolio = '/app/add_portfolio';
   static const String appGetOrder = '/app/order';
   static const String appGetQrcode = '/app/qr_code_screen';
+  static const String appAddContactProfile = '/app/add_contact_profile';
   static const String appContactProfile = '/app/contact_profile';
+
   static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   // Gestion des routes
@@ -58,12 +60,16 @@ class AppRoutes {
           builder: (_) => PortfolioDetailScreen(args: args),
         );
 
+      case appAddContactProfile:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => AddContactProfileWiew(args: args),
+        );
       case appContactProfile:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(
           builder: (_) => ContactProfileWiew(args: args),
         );
-
       case appAddPortfolio:
         return MaterialPageRoute(builder: (_) => PortfolioFormScreen());
       case appAddCard:

@@ -18,6 +18,9 @@ ProfileData _$ProfileDataFromJson(Map<String, dynamic> json) => ProfileData(
       localisation: json['localisation'] as String?,
       profile_image: json['profile_image'] as String?,
       banier: json['banier'] as String?,
+      facebook: json['facebook'] as String?,
+      whatsapp: json['whatsapp'] as String?,
+      linkedin: json['linkedin'] as String?,
     );
 
 Map<String, dynamic> _$ProfileDataToJson(ProfileData instance) =>
@@ -33,4 +36,7 @@ Map<String, dynamic> _$ProfileDataToJson(ProfileData instance) =>
       'localisation': instance.localisation,
       'profile_image': instance.profile_image,
       'banier': instance.banier,
+      'facebook': instance.facebook,
+      'whatsapp': instance.whatsapp,
+      'linkedin': instance.linkedin,
     };

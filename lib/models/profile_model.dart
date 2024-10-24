@@ -15,6 +15,10 @@ class ProfileData {
   final String? localisation;
   final String? profile_image;
   final String? banier;
+  // Réseaux sociaux
+  final String? facebook;
+  final String? whatsapp;
+  final String? linkedin;
 
   ProfileData({
     required this.id,
@@ -28,6 +32,9 @@ class ProfileData {
     this.localisation,
     this.profile_image,
     this.banier,
+    this.facebook,
+    this.whatsapp,
+    this.linkedin,
   });
 
   factory ProfileData.fromJson(Map<String, dynamic> json) => _$ProfileDataFromJson(json);

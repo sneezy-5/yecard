@@ -138,7 +138,7 @@
 
 import 'package:flutter/material.dart';
 import '../../../widgets/app_bar.dart';
-import 'package:yecard/services/contact_service.dart'; // Make sure the path is correct
+import 'package:yecard/services/contact_service.dart';
 
 class ContactsScreen extends StatefulWidget {
   @override
@@ -148,6 +148,7 @@ class ContactsScreen extends StatefulWidget {
 class _ContactsScreenState extends State<ContactsScreen> {
   late Future<Map<String, dynamic>> _futureContacts;
   ContactService contactService = ContactService();
+
 
   @override
   void initState() {
@@ -200,7 +201,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
                   return Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Erreur : ${snapshot.error}'));
-                } else if (!snapshot.hasData || !(snapshot.data!['success'])) {
+                } else if (!snapshot.hasData || !(snapshot.data!['success'] || snapshot.data!['data'] == [])) {
                   return Center(child: Text('Aucune donnée disponible'));
                 }
 
@@ -213,13 +214,16 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       final contact = contacts[index];
                       return ListTile(
                         leading: CircleAvatar(
-                          backgroundImage: NetworkImage(contact['avatar'] ?? ''),
+                          backgroundImage: NetworkImage(contact['to_user']['profile_image'] ?? ''),
                         ),
-                        title: Text(contact['name'] ?? 'Unknown'),
-                        subtitle: Text(contact['role'] ?? 'Unknown role'),
+                        title: Text(contact['to_user'] ['name']?? 'Unknown'),
+                        subtitle: Text(contact['to_user'] ['fonction']?? 'Unknown role'),
                         trailing: Icon(Icons.more_vert),
                         onTap: () {
-                          // Handle tap on a contact
+                          Navigator.of(context).pushNamed('/app/contact_profile',
+                              arguments: {
+                                'id': contact['to_user']['id'],
+                              });
                         },
                       );
                     },

@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 class DetailScreen extends StatelessWidget {
   final String title;
   final String description;
-  final List<String> photos;
+  final List<dynamic> photos;
+  final String? mot_de_fin;
 
   DetailScreen({
     required this.title,
     required this.description,
     required this.photos,
+    required this.mot_de_fin,
   });
 
   @override
@@ -34,6 +36,16 @@ class DetailScreen extends StatelessWidget {
             // Description
             Text(
               description,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.grey[800],
+              ),
+            ),
+            SizedBox(height: 16),
+
+            // Description
+            Text(
+              mot_de_fin!,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.grey[800],

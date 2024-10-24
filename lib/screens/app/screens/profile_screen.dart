@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:yecard/repositories/portfolio_repository.dart';
 import 'package:yecard/services/portfolio_service.dart';
@@ -52,6 +53,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   final _localisationController = TextEditingController();
   final _profileImageController = TextEditingController();
   final _bannerImageController = TextEditingController();
+  final _facebookController = TextEditingController();
+  final _whatsappController = TextEditingController();
+  final _linkedinController = TextEditingController();
 
   @override
   void initState() {
@@ -80,23 +84,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _domicileController.dispose();
     _profileImageController.dispose();
     _bannerImageController.dispose();
+    _facebookController.dispose();
+    _whatsappController.dispose();
+    _linkedinController.dispose();
     super.dispose();
   }
 
   Future<void> _pickImage(bool isProfileImage) async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      setState(() {
-        if (isProfileImage) {
-          _selectedProfileImage = File(pickedFile.path);
-          _saveProfile();
-        } else {
-          _selectedBannerImage = File(pickedFile.path);
-          _saveProfile();
-        }
-      });
-    }
   }
 
   @override
@@ -141,137 +136,143 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           showBackButton: true,
           customBackIcon: Icons.arrow_back_ios,
           actions: [
-            // if (_isOnPortfolioTab)
-            //
-            //   IconButton(
-            //     icon: Icon(Icons.add_circle_outline),
-            //     color: Colors.white,
-            //     onPressed: () {
-            //       Navigator.of(context).pushNamed('/app/add_portfolio');
-            //     },
-            //   ),
+            if (_isOnPortfolioTab)
+
+              IconButton(
+                icon: Icon(Icons.add_circle_outline),
+                color: Colors.white,
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/app/add_portfolio');
+                },
+              ),
           ],
         ),
         body: isLoading
             ? Center(child: CircularProgressIndicator())
-            : Stack(
+            : ListView(
+    padding: EdgeInsets.zero,
           children: [
-            Column(
+            Stack(
               children: [
-                Stack(
+                Column(
                   children: [
-                    GestureDetector(
-                      onTap: () => _pickImage(false), // Pick banner image
-                      child: Container(
-                        width: double.infinity,
-                        height: 100,
-                        child: _selectedBannerImage == null
-                            ? Image.network(
-                          _bannerImageController.text,
-                          fit: BoxFit.cover,
-                        )
-                            : Image.file(
-                          _selectedBannerImage!,
-                          fit: BoxFit.cover,
+                    Stack(
+                      children: [
+                        GestureDetector(
+                          onTap: () => _pickImage(false), // Pick banner image
+                          child: Container(
+                            width: double.infinity,
+                            height: 100,
+                            child: _selectedBannerImage == null
+                                ? Image.network(
+                              _bannerImageController.text,
+                              fit: BoxFit.cover,
+                            )
+                                : Image.file(
+                              _selectedBannerImage!,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
                         ),
+                        Positioned(
+                          right: 8,
+                          bottom: 0,
+                          child: IconButton(
+                            icon: Icon(Icons.edit, color: Colors.white),
+                            onPressed: () {
+                              _pickImage(false); // Pick new banner image
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    Container(
+                      height: 200,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: 50,
+                            left: MediaQuery.of(context).size.width / 2 - 50,
+                            child: GestureDetector(
+                              onTap: () => _pickImage(true), // Pick profile image
+                              child: CircleAvatar(
+                                radius: 50,
+                                backgroundImage: _selectedProfileImage == null
+                                    ? NetworkImage(_profileImageController.text)
+                                    : FileImage(_selectedProfileImage!) as ImageProvider,
+                              ),
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            top: 150,
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    _nameController.text,
+                                    style: const TextStyle(
+                                      fontSize: 20,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  Text(
+                                    _fonctionController.text,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Positioned(
-                      right: 8,
-                      bottom: 0,
-                      child: IconButton(
-                        icon: Icon(Icons.edit, color: Colors.white),
-                        onPressed: () {
-                          _pickImage(false); // Pick new banner image
-                        },
+                    DefaultTabController(
+                      length: 2,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          TabBar(
+                            controller: _tabController,
+                            indicatorColor: Colors.green,
+                            labelColor: Colors.black,
+                            unselectedLabelColor: Colors.grey,
+                            indicatorSize: TabBarIndicatorSize.tab,
+                            tabs: const [
+                              Tab(text: 'About'),
+                              Tab(text: 'Portfolio'),
+                            ],
+                          ),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child:  TabBarView(
+                              controller: _tabController,
+                              children: [
+                                _buildAboutTab(),
+                                _buildPortfolioTab(),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            Column(
-              children: [
-                Container(
-                  height: 200,
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: 50,
-                        left: MediaQuery.of(context).size.width / 2 - 50,
-                        child: GestureDetector(
-                          onTap: () => _pickImage(true), // Pick profile image
-                          child: CircleAvatar(
-                            radius: 50,
-                            backgroundImage: _selectedProfileImage == null
-                                ? NetworkImage(_profileImageController.text)
-                                : FileImage(_selectedProfileImage!) as ImageProvider,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        top: 150,
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                _nameController.text,
-                                style: const TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              Text(
-                                _fonctionController.text,
-                                style: TextStyle(
-                                  color: Colors.black,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                DefaultTabController(
-                  length: 2,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TabBar(
-                        controller: _tabController,
-                        indicatorColor: Colors.green,
-                        labelColor: Colors.black,
-                        unselectedLabelColor: Colors.grey,
-                        indicatorSize: TabBarIndicatorSize.tab,
-                        tabs: const [
-                          Tab(text: 'About'),
-                          Tab(text: 'Portfolio'),
-                        ],
-                      ),
-                  SizedBox(
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    child:  TabBarView(
-                          controller: _tabController,
-                          children: [
-                            _buildAboutTab(),
-                            _buildPortfolioTab(),
-                          ],
-                        ),
-                  ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
           ],
-        ),
+        )
+
       ),
     );
   }
@@ -282,6 +283,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
+          // Section Biographie
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -293,8 +295,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 onPressed: () {
                   if (_isEditing) {
                     _saveProfile();
-                  }
-                  setState(() {
+                  }                  setState(() {
                     _isEditing = !_isEditing;
                   });
                 },
@@ -307,35 +308,96 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           _isEditing
               ? _buildEditableTextField(_biographieController, 5)
               : _buildReadOnlyTextField(_biographieController.text),
+
+          // Autres champs (Nom, Email, Fonction, etc.)
+          _buildFieldWithLabel(Icons.label, 'Nom', _nameController),
+          _buildFieldWithLabel(Icons.mail_outline, 'Email', _emailController),
+          _buildFieldWithLabel(Icons.work, 'Fonction', _fonctionController),
+          _buildFieldWithLabel(Icons.phone, 'Phone', _phoneController),
+          _buildFieldWithLabel(Icons.language, 'Portfolio Site', _siteController),
+          _buildFieldWithLabel(Icons.house, 'Domicile', _localisationController),
+
+          // Section Réseaux sociaux
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Mes réseaux sociaux',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+
+            ],
+          ),
           SizedBox(height: 10),
-          // Similar sections for other fields...
-          _buildFieldWithLabel(Icons.label,'Nom', _nameController),
-          _buildFieldWithLabel(Icons.mail_outline,'Email', _emailController),
-          _buildFieldWithLabel(Icons.work,'Fonction', _fonctionController),
-          _buildFieldWithLabel(Icons.phone,'Phone', _phoneController),
-          _buildFieldWithLabel(Icons.label,'Portfolio Site', _siteController),
-          _buildFieldWithLabel(Icons.house,'Domicile', _localisationController),
-          SizedBox(height: 300),
+
+          // Facebook
+          _buildSocialMediaField(Icons.facebook, 'Facebook', _facebookController),
+          // WhatsApp
+          _buildSocialMediaField(FontAwesomeIcons.whatsapp, 'WhatsApp', _whatsappController),
+          // LinkedIn
+          _buildSocialMediaField(FontAwesomeIcons.linkedin, 'LinkedIn', _linkedinController),
+          SizedBox(height: 60),
         ],
       ),
     );
   }
 
-  Widget _buildFieldWithLabel( IconData icon, String label, TextEditingController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ListTile(
-          leading: Icon(icon),
-          title: Text(label),
-        ),
-        _isEditing
-            ? _buildEditableTextField(controller, 1)
-            : _buildReadOnlyTextField(controller.text),
-        SizedBox(height: 10),
-      ],
+  Widget _buildFieldWithLabel(IconData icon, String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0), // Add some vertical padding
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 30),
+          SizedBox(width: 10), // Add a little space between the icon and text field
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                _isEditing
+                    ? _buildEditableTextField(controller, 1)
+                    : _buildReadOnlyTextField(controller.text),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
+
+  Widget _buildSocialMediaField(IconData icon, String label, TextEditingController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0), // Add some vertical padding
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 30),
+          SizedBox(width: 10), // Space between icon and text
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                _isEditing
+                    ? _buildEditableTextField(controller, 1)
+                    : _buildReadOnlyTextField(controller.text),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 
   Widget _buildPortfolioTab() {
     return Padding(
@@ -360,6 +422,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 arguments: {
                   'title': item['title'],
                   'description': item['description'],
+                  'mot_de_fin': item['mot_de_fin'],
                   'file_1': item['file_1'],
                   'file_2': item['file_2'],
                   'file_3': item['file_3']
@@ -418,8 +481,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _profileImageController.text = profileData.profile_image ?? '';
     _bannerImageController.text = profileData.banier ?? '';
     _siteController.text = profileData.site_url ?? '';
+    _facebookController.text = profileData.facebook ?? '';
+    _whatsappController.text = profileData.whatsapp ?? '';
+    _linkedinController.text = profileData.linkedin ?? '';
   }
-
 
   void _saveProfile() {
     final updatedProfile = ProfileData(
@@ -431,19 +496,19 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       phone: _phoneController.text,
       email: _emailController.text,
       localisation: _localisationController.text,
-      site_url: _siteController.text,
-      profile_image: '',
-      banier: '',
+      facebook: _facebookController.text,
+      whatsapp: _whatsappController.text,
+      linkedin: _linkedinController.text,
+
     );
 
-    _profileBloc.add(UpdateProfile(
-      profileData: updatedProfile,
-      picture: _selectedProfileImage,
-      banier: _selectedBannerImage,
-    ));
+    _profileBloc.add(UpdateProfile(profileData: updatedProfile));
 
     setState(() {
       _isEditing != _isEditing;
     });
+    print("fefeefeffefefe");
   }
+
+
 }

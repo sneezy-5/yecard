@@ -5,8 +5,8 @@ import 'package:yecard/services/user_preference.dart';
 import '../models/portfolio.dart';
 
 class PortfolioService {
-  final String _baseUrl = 'https://yecard.pro';
-  // final String _baseUrl = 'http://192.168.152.200:8000';
+  // final String _baseUrl = 'https://yecard.pro';
+  final String _baseUrl = 'http://192.168.1.18:8000';
 
   Future<Map<String, dynamic>> getPortfolio() async {
     try {
@@ -70,7 +70,7 @@ class PortfolioService {
         final responseBody = jsonDecode(utf8.decode(response.bodyBytes));
         return {
           'success': true,
-          'data': responseBody["results"],
+          'data': responseBody,
         };
       } else if (response.statusCode == 401) {
         return {
@@ -105,9 +105,9 @@ class PortfolioService {
       request.headers['Content-Type'] = 'multipart/form-data; charset=UTF-8';
 
       request.fields.addAll({
-        'title': utf8.encode(createData.title).toString(),
-        'description': utf8.encode(createData.description).toString(),
-        'mot_de_fin': utf8.encode(createData.mot_de_fin).toString(),
+        'title': createData.title,
+        'description': createData.description,
+        'mot_de_fin': createData.mot_de_fin,
       });
 
       if (file1 != null) {
@@ -116,9 +116,9 @@ class PortfolioService {
       if (file2 != null) {
         request.files.add(await http.MultipartFile.fromPath('file_url2', file2.path));
       }
-      if (file3 != null) {
-        request.files.add(await http.MultipartFile.fromPath('file_url3', file3.path));
-      }
+      // if (file3 != null) {
+      //   request.files.add(await http.MultipartFile.fromPath('file_url3', file3.path));
+      // }
 
       var response = await request.send();
       final responseBody = await response.stream.bytesToString();

@@ -1,15 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:yecard/models/profile_model.dart';
 import 'package:yecard/services/user_preference.dart';
 
-import '../routes.dart';
-
 class ProfileService {
-  final String _baseUrl = 'https://yecard.pro';
-  // final String _baseUrl = 'http://192.168.152.200:8000';
+  // final String _baseUrl = 'https://yecard.pro';
+  final String _baseUrl = 'http://192.168.1.18:8000';
 
   // Méthode pour récupérer le profil avec un appel GET
   Future<Map<String, dynamic>> getProfile() async {
@@ -23,7 +20,7 @@ class ProfileService {
       final response = await http.get(
         Uri.parse('$_baseUrl/api/v0/account/profile/'),
         headers: {
-          'Content-Type': 'application/json; charset=UTF-8', // Ensure UTF-8 encoding
+          'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
         },
       );
@@ -112,6 +109,50 @@ class ProfileService {
     }
   }
 
+  Future<Map<String, dynamic>> getContact(int id) async {
+    try {
+      String? token = await UserPreferences.getUserToken();
+
+      if (token == null) {
+        throw Exception("Token non disponible");
+      }
+
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/v0/users/${id}/'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8', // Ensure UTF-8 encoding
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(utf8.decode(response.bodyBytes)); // Handle UTF-8 encoding
+        print("data : ${responseBody}");
+        return {
+          'success': true,
+          'data': responseBody,
+        };
+      } else if (response.statusCode == 401) {
+        return {
+          'success': false,
+          'error': "Accès non autorisé. Veuillez vous reconnecter.",
+        };
+      } else {
+        final responseBody = jsonDecode(utf8.decode(response.bodyBytes));
+        return {
+          'success': false,
+          'errors': "User dose not exist"
+        };
+      }
+    } catch (e) {
+      print("Erreur lors de l'appel GET : $e");
+      return {
+        'success': false,
+        'error': 'Erreur lors de l\'appel API : $e',
+      };
+    }
+  }
+
   // Méthode pour mettre à jour le profil avec un appel PATCH
   Future<Map<String, dynamic>> updateProfile(ProfileData updateData, int id, File? picture, File? banier) async {
     try {
@@ -121,8 +162,6 @@ class ProfileService {
       if (token == null) {
         throw Exception("Token non disponible");
       }
-
-      print("DATA : ${updateData}");
 
       var request = http.MultipartRequest(
         'PATCH',
@@ -141,7 +180,11 @@ class ProfileService {
       request.fields['email'] = updateData.email ?? '';
       request.fields['localisation'] = updateData.localisation ?? '';
       request.fields['site_url'] = updateData.site_url ?? '';
+      request.fields['facebok'] = updateData.facebook ?? '';
+      request.fields['whatsapp'] = updateData.whatsapp ?? '';
+      request.fields['linkedin'] = updateData.linkedin ?? '';
 
+      print(updateData);
 
       // Add profile picture
       if (picture != null) {
@@ -162,6 +205,7 @@ class ProfileService {
           ),
         );
       }
+      print("PATCH sdfef");
 
       var response = await request.send();
       print("PATCH STATUS: ${response.statusCode}");

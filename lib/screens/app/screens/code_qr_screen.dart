@@ -248,10 +248,9 @@ class _QrCodeScannerScreenState extends State<QrCodeScannerScreen>
           setState(() {
             result = barcode;
           });
-          await controller.stop();  // Arrête le scanner après la détection d'un QR code
-          print("QR Code Detected: ${barcode.rawValue}");
+          await controller.stop();
 
-          Navigator.of(context).pushNamed('/app/contact_profile',
+          Navigator.of(context).pushNamed('/app/add_contact_profile',
               arguments: {
                 'id': barcode.rawValue,
               });

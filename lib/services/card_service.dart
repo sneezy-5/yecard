@@ -5,8 +5,8 @@ import 'package:yecard/services/user_preference.dart';
 import '../models/card_model.dart';
 
 class CardService {
-  final String _baseUrl = 'https://yecard.pro';
-  // final String _baseUrl = 'http://192.168.152.200:8000';
+  // final String _baseUrl = 'https://yecard.pro';
+  final String _baseUrl = 'http://192.168.1.18:8000';
 
   Future<Map<String, dynamic>> getCard() async {
     try {

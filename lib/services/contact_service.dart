@@ -5,10 +5,10 @@ import 'package:yecard/services/user_preference.dart';
 import '../models/contact_model.dart';
 
 class ContactService {
-  final String _baseUrl = 'https://yecard.pro';
-  // final String _baseUrl = 'http://192.168.152.200:8000';
+  // final String _baseUrl = 'https://yecard.pro';
+  final String _baseUrl = 'http://192.168.1.18:8000';
 
-  Future<Map<String, dynamic>> getContactProfile(String id) async {
+  Future<Map<String, dynamic>> getContactProfile(String id, String page) async {
     try {
       String? token = await UserPreferences.getUserToken();
 
@@ -17,7 +17,7 @@ class ContactService {
       }
 
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/v0/contact/?p=${id}'),
+        Uri.parse('$_baseUrl/api/v0/contact/?p=${id}offset=${page}'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
@@ -62,7 +62,7 @@ class ContactService {
       }
 
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/v0/contact/'),
+        Uri.parse('$_baseUrl/api/v0/contacts/'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8', // Ensure UTF-8 encoding
           'Authorization': 'Bearer $token',
@@ -105,7 +105,7 @@ class ContactService {
     try {
 
       final response = await http.post(
-        Uri.parse('$_baseUrl/api/v0/contact/'),
+        Uri.parse('$_baseUrl/api/v0/contacts/'),
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
 

@@ -4,7 +4,7 @@ part 'contact_model.g.dart';
 
 @JsonSerializable()
 class ContactData {
-  final int from_user;
+  final int? from_user;
   final int to_user;
 
   ContactData({

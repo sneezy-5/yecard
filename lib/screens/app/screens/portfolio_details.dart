@@ -69,11 +69,17 @@ class PortfolioDetailScreen extends StatelessWidget {
         ],
       ),
       body: Center(
-        child: DetailScreen(
-          title: args?['title'] ?? 'sdvdsf',
-          description: args?['description']?? 'faewrgeg',
-          photos: [args?['file_1'],args?['file_2'], args?['file_3']],
+        child:DetailScreen(
+          title: args?['title'] ?? 'Not data',
+          description: args?['description'] ?? 'Not data',
+          mot_de_fin: args?['mot_de_fin'] ?? 'Not data',
+          photos: [
+            args?['file_1'],
+            args?['file_2'],
+            args?['file_3'],
+          ].where((file) => file != null).toList(),
         ),
+
       ),
     );
   }
