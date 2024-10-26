@@ -6,7 +6,7 @@ import '../models/contact_model.dart';
 
 class ContactService {
   // final String _baseUrl = 'https://yecard.pro';
-  final String _baseUrl = 'http://192.168.1.18:8000';
+  final String _baseUrl = 'http://192.168.180.199:8000';
 
   Future<Map<String, dynamic>> getContactProfile(String id, String page) async {
     try {
@@ -103,12 +103,17 @@ class ContactService {
   Future<Map<String, dynamic>> addContact(ContactData contactData) async {
     print("DATA ${contactData.toJson()}");
     try {
+      String? token = await UserPreferences.getUserToken();
+
+      if (token == null) {
+        throw Exception("Token non disponible");
+      }
 
       final response = await http.post(
         Uri.parse('$_baseUrl/api/v0/contacts/'),
         headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
         },
         body: jsonEncode(contactData.toJson()),
       );

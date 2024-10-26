@@ -47,7 +47,6 @@ class _CProfileScreenState extends State<ContactProfileWiew>
   List<dynamic> portfolioItems = [];
   bool _isEditing = false;
   bool isLoading = true;
-
   File? _selectedProfileImage;
   File? _selectedBannerImage;
 
@@ -80,27 +79,21 @@ class _CProfileScreenState extends State<ContactProfileWiew>
 
   Future<void> _fetchData() async {
     try {
-      // final portfolioResponse = await _portfolioRepository.getContactPortfolio((args?['id']));
       final profileResponse = await _profileRepository.contact(args?['id']);
+      final portfolioResponse = await _portfolioRepository.getContactPortfolio((args?['id']));
 
       setState(() {
         print("PROFILEEA:${profileResponse }");
-        print("PROFILEEE:${args?['id'] }");
-        // print("PORTFOLIO:${portfolioResponse }");
-        // if (portfolioResponse['success']) {
-        //   if (portfolioResponse['data']){
-        //     // final protfolioData = PortfolioData.fromJson(portfolioResponse['data']);
-        //     portfolioItems = portfolioResponse['data'];
-        //   }
-        //
-        //
+        print("PORTFOLIO:${portfolioResponse }");
+        if (portfolioResponse != null && portfolioResponse['success']) {
+          if (portfolioResponse['data'] != null) {
+            // Example: portfolioItems = portfolioResponse['data'];
+            portfolioItems = portfolioResponse['data']['results'];
+
+          }
+        }
 
 
-
-
-
-
-        // }
         if (profileResponse['success'] ) {
           final profileData = ProfileData.fromJson(profileResponse['data']);
           id = profileData.id;
@@ -122,6 +115,7 @@ class _CProfileScreenState extends State<ContactProfileWiew>
             },
           );
         }
+
         isLoading = false;
       });
     } catch (e) {
@@ -376,7 +370,14 @@ class _CProfileScreenState extends State<ContactProfileWiew>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.network(item['file_1']),
+                  Container(
+                    width: 200,
+                    height: 50,
+                    child: Image.network(
+                      item['file_1'],
+                      fit: BoxFit.cover, // Ensures the image fills the container
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   Text(
                     item['title'] ?? 'Item ${index + 1}',

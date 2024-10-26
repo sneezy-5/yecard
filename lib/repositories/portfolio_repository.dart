@@ -12,7 +12,7 @@ class PortfolioRepository {
   Future<Map<String, dynamic>>portfolio () async {
     return await _portfolioService.getPortfolio();
   }
-  Future<Map<String, dynamic>>getContactPortfolio (String id) async {
+  Future<Map<String, dynamic>>getContactPortfolio (int id) async {
     return await _portfolioService.getContactPortfolio(id);
   }
   Future<Map<String, dynamic>>createPortfolio (PortfolioData createData, File? file1, File? file2, File? file3) async {

@@ -56,6 +56,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   final _facebookController = TextEditingController();
   final _whatsappController = TextEditingController();
   final _linkedinController = TextEditingController();
+  bool _isPortfolioLoaded = false;
 
   @override
   void initState() {
@@ -66,6 +67,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     _tabController.addListener(() {
       setState(() {
         _isOnPortfolioTab = _tabController.index == 1;
+        _loadPortfolio();
+
       });
     });
   }
@@ -91,23 +94,50 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
   Future<void> _pickImage(bool isProfileImage) async {
+    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
 
+    if (pickedFile != null) {
+      setState(() {
+        if (isProfileImage) {
+          _selectedProfileImage = File(pickedFile.path);
+          _saveProfile();
+        } else {
+          _selectedBannerImage = File(pickedFile.path);
+          _saveProfile();
+        }
+      });
+    }
   }
+  Future<void> _loadPortfolio() async {
+    // setState(() {
+    //   isLoading = true;
+    // });
 
+    try {
+      final responses = await _portfolioRepository.portfolio();
+      if (responses['success']) {
+        setState(() {
+          portfolioItems = responses['data'];
+          _isPortfolioLoaded = true;
+          // isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print("Erreur lors du chargement du portfolio: $e");
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return BlocListener<ProfileBloc, ProfileState>(
       listener: (context, state) async {
-        final responses = await _portfolioRepository.portfolio();
-        // final portfolioData = PortfolioData.fromJson(responses["data"]);
 
         if (state is ProfileLoaded) {
           _fillProfileData(state.profileData );
           setState(() {
 
-            if (responses['success']) {
-              portfolioItems = responses['data'];
-            }
             isLoading = false;
             id = state.profileData.id;
           });
@@ -121,12 +151,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           setState(() {
             isLoading = false;
           });
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(content: Text(state.error)),
+          // );
+        } else if (state.error.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.error)),
-          );
-        } else if (state.message.isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
           );
         }
       },
@@ -343,7 +373,10 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildFieldWithLabel(IconData icon, String label, TextEditingController controller) {
+  Widget _buildFieldWithLabel(IconData icon, String label, TextEditingController controller, {TextInputType keyboardType = TextInputType.text}) {
+    if (icon == Icons.phone) {
+      keyboardType = TextInputType.number; // Set keyboardType to number if the icon is a phone
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0), // Add some vertical padding
       child: Row(
@@ -360,7 +393,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 _isEditing
-                    ? _buildEditableTextField(controller, 1)
+                    ? _buildEditableTextField(controller, 1,keyboardType: keyboardType)
                     : _buildReadOnlyTextField(controller.text),
               ],
             ),
@@ -436,8 +469,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-              Image.network(item['file_1']),
-                  // Icon(Icons.image, size: 50, color: Colors.grey),
+                  Container(
+                    width: 200,
+                    height: 50,
+                    child: Image.network(
+                      item['file_1'],
+                      fit: BoxFit.cover, // Ensures the image fills the container
+                    ),
+                  ),
+
                   SizedBox(height: 10),
                   Text(
                     item['title'] ?? 'Item ${index + 1}',
@@ -451,11 +491,12 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       ),
     );
   }
-
-  Widget _buildEditableTextField(TextEditingController controller, int maxLines) {
+  Widget _buildEditableTextField(
+      TextEditingController controller, int maxLines, {TextInputType keyboardType = TextInputType.text}) {
     return TextField(
       controller: controller,
       maxLines: maxLines,
+      keyboardType: keyboardType, // Set dynamically
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
@@ -465,6 +506,21 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       ),
     );
   }
+
+  // Widget _buildEditableTextField(TextEditingController controller, int maxLines) {
+  //   return TextField(
+  //     controller: controller,
+  //     maxLines: maxLines,
+  //     keyboardType: TextInputType.number,
+  //     decoration: InputDecoration(
+  //       filled: true,
+  //       fillColor: Colors.white,
+  //       border: UnderlineInputBorder(),
+  //       hintText: 'Edit text',
+  //       hintStyle: TextStyle(color: Colors.grey),
+  //     ),
+  //   );
+  // }
 
   Widget _buildReadOnlyTextField(String text) {
     return Text(text.isNotEmpty ? text : 'Non spécifié');
@@ -502,12 +558,15 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
     );
 
-    _profileBloc.add(UpdateProfile(profileData: updatedProfile));
-
+    // _profileBloc.add(UpdateProfile(profileData: updatedProfile));
+    _profileBloc.add(UpdateProfile(
+      profileData: updatedProfile,
+      picture: _selectedProfileImage,
+      banier: _selectedBannerImage,
+    ));
     setState(() {
       _isEditing != _isEditing;
     });
-    print("fefeefeffefefe");
   }
 
 

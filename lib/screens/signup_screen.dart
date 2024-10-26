@@ -195,6 +195,7 @@ class SignupView extends StatelessWidget {
               hintText: 'Numéro',
               textController: phoneController,
               errorText: state.errorMessages['phone']?.join(', '),
+              keyboardType: TextInputType.phone,
             ),
             SizedBox(height: 20),
             CustomTextFormField(

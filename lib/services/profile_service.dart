@@ -6,7 +6,7 @@ import 'package:yecard/services/user_preference.dart';
 
 class ProfileService {
   // final String _baseUrl = 'https://yecard.pro';
-  final String _baseUrl = 'http://192.168.1.18:8000';
+  final String _baseUrl = 'http://192.168.180.199:8000';
 
   // Méthode pour récupérer le profil avec un appel GET
   Future<Map<String, dynamic>> getProfile() async {
@@ -109,6 +109,50 @@ class ProfileService {
     }
   }
 
+  Future<Map<String, dynamic>> contactChect(int id) async {
+    try {
+      String? token = await UserPreferences.getUserToken();
+
+      if (token == null) {
+        throw Exception("Token non disponible");
+      }
+
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/v0/contact/check/?to_user_id=${id}'),
+        headers: {
+          'Content-Type': 'application/json', // Ensure UTF-8 encoding
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        print("data : ${responseBody}");
+        return {
+          'success': true,
+          'data': responseBody,
+        };
+      } else if (response.statusCode == 401) {
+        return {
+          'success': false,
+          'error': "Accès non autorisé. Veuillez vous reconnecter.",
+        };
+      } else {
+        final responseBody = jsonDecode(utf8.decode(response.bodyBytes));
+        return {
+          'success': false,
+          'errors': "User dose not exist"
+        };
+      }
+    } catch (e) {
+      print("Erreur lors de l'appel GET : $e");
+      return {
+        'success': false,
+        'error': 'Erreur lors de l\'appel API : $e',
+      };
+    }
+  }
+
   Future<Map<String, dynamic>> getContact(int id) async {
     try {
       String? token = await UserPreferences.getUserToken();
@@ -180,7 +224,7 @@ class ProfileService {
       request.fields['email'] = updateData.email ?? '';
       request.fields['localisation'] = updateData.localisation ?? '';
       request.fields['site_url'] = updateData.site_url ?? '';
-      request.fields['facebok'] = updateData.facebook ?? '';
+      request.fields['facebook'] = updateData.facebook ?? '';
       request.fields['whatsapp'] = updateData.whatsapp ?? '';
       request.fields['linkedin'] = updateData.linkedin ?? '';
 
@@ -214,7 +258,7 @@ class ProfileService {
         final responseBody = await response.stream.bytesToString();
         return {
           'success': true,
-          'data': jsonDecode(utf8.decode(responseBody.runes.toList())), // Handle UTF-8 encoding
+          'data': 'Profil mis à jour avec succès',
           'message': 'Profil mis à jour avec succès',
         };
       } else if (response.statusCode == 400) {
@@ -236,7 +280,13 @@ class ProfileService {
           'success': false,
           'error': "Accès non autorisé. Veuillez vous reconnecter.",
         };
-      } else {
+      } else if (response.statusCode == 413) {
+        return {
+          'success': false,
+          'error': "Votre fichier est trop lourd.",
+        };
+      }
+      else {
         print("Statut de la réponse PATCH : ${response.statusCode}");
 
         return {

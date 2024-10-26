@@ -2,11 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:http/http.dart' as http;
 import 'package:yecard/repositories/portfolio_repository.dart';
 import 'package:yecard/services/portfolio_service.dart';
 import '../../../models/contact_model.dart';
 import '../../../models/profile_model.dart';
 import '../../../repositories/profile_repository.dart';
+import '../../../routes.dart';
 import '../../../services/contact_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../services/user_preference.dart';
@@ -43,11 +45,11 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
 
   late TabController _tabController;
 
-  bool _isOnPortfolioTab = false;
   List<dynamic> portfolioItems = [];
   bool _isEditing = false;
   bool isLoading = true;
   bool _isSaving = false;
+  bool _isAlreadySaved = false;
 
   File? _selectedProfileImage;
   File? _selectedBannerImage;
@@ -73,27 +75,31 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
     _tabController = TabController(length: 2, vsync: this);
     _getUserInfo();
     _tabController.addListener(() {
-      setState(() {
-        _isOnPortfolioTab = _tabController.index == 1;
-      });
+      // setState(() {
+      //   _isOnPortfolioTab = _tabController.index == 1;
+      // });
     });
     _fetchData();
   }
 
   Future<void> _fetchData() async {
     try {
-      final portfolioResponse = await _portfolioRepository.getContactPortfolio(args?['id']);
+      final getprofileResponse = await _profileRepository.profile();
       final profileResponse = await _profileRepository.contactProfile(args?['id']);
-
+      final contactCheckResponse = await _profileRepository.contactCheck(profileResponse['data']['id']); // Check if contact is already saved
+      final portfolioResponse = await _portfolioRepository.getContactPortfolio(profileResponse['data']['id']);
       setState(() {
         print("PROFILE: $profileResponse");
         print("PORTFOLIO: $portfolioResponse");
+        print("CONTACT: $contactCheckResponse");
 
         // Handling portfolio response
         if (portfolioResponse != null && portfolioResponse['success']) {
           if (portfolioResponse['data'] != null) {
             // Process portfolio data here
             // Example: portfolioItems = portfolioResponse['data'];
+            portfolioItems = portfolioResponse['data']['results'];
+
           }
         }
 
@@ -101,11 +107,18 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
         if (profileResponse != null && profileResponse['success']) {
           final profileData = ProfileData.fromJson(profileResponse['data']);
           id = profileData.id;
+          final userId = getprofileResponse['data']['id'];
           _fillProfileData(profileData);
+          print("ID $userId");
+          if (id==userId)
+            Navigator.of(context).pop();
+              // AppRoutes.pushReplacement(context, AppRoutes.appProfile);
+            Navigator.of(context).pushNamed('/app/profile');
         } else {
           // If profile data is empty, display a popup
-          _showUserNotFoundPopup();
+          _showUserPopup("Error", "Utilisateur introuvable");
         }
+        _isAlreadySaved = contactCheckResponse != null && contactCheckResponse['data']['exists'] == true;
 
         isLoading = false;
       });
@@ -117,13 +130,13 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
     }
   }
 
-  void _showUserNotFoundPopup() {
+  void _showUserPopup(String title, String content) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return CustomPopup(
-          title: 'Erreur',
-          content: 'Utilisateur introuvable',
+          title: title,
+          content: content,
           buttonText: 'Ok',
           onButtonPressed: () {
             Navigator.of(context).pop(); // Close the popup
@@ -333,32 +346,36 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
           // LinkedIn
           _buildSocialMediaField(FontAwesomeIcons.linkedin, 'LinkedIn', _linkedinController),
           SizedBox(height: 10),
+
           // Boutons d'enregistrement
           _isSaving
-              ? Center(child: CircularProgressIndicator()) // Affiche un indicateur de chargement
+              ? Center(child: CircularProgressIndicator())
               : ElevatedButton(
             onPressed: _saveProfileAsContact,
             child: Text("Enregistrer sur le téléphone"),
           ),
 
-          ElevatedButton(
-            onPressed: () {
-              final userId = int.tryParse(userInfo?['id'] ?? '');
+          // Boutons d'enregistrement
+            _isAlreadySaved
+              ? SizedBox.shrink() // Hide button if already saved
+              : ElevatedButton(
+            onPressed: () async {
+              setState(() => _isSaving = true);
+              ContactData contactData = ContactData(from_user: 1, to_user: id);
+              final response = await contactService.addContact(contactData);
 
-              ContactData contactdata = ContactData(from_user: 1, to_user: id);
-              contactService.addContact(contactdata);
+              setState(() {
+                _isSaving = false;
+                if (response["success"] == true) {
+                  _isAlreadySaved = true;
+                  _showUserPopup("Success", "Contact enregistré");
+                }
+              });
             },
             child: Text("Enregistrer dans l'application"),
           ),
 
-          // ElevatedButton(onPressed: _saveProfileAsContact, child: Text("Enregistrer sur le telphone")),
-          // ElevatedButton(onPressed: () {
-          //   final userId = int.tryParse(userInfo?['id'] ?? '');
-          //
-          //   ContactData contactdata = ContactData(from_user: userId, to_user: id) ;
-          //   contactService.addContact(contactdata);
-          // }, child: Text("Enregistrer dans lapplication")),
-          SizedBox(height: 10),
+          SizedBox(height: 30),
         ],
       ),
     );
@@ -451,7 +468,14 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.network(item['file_1']),
+                  Container(
+                    width: 200,
+                    height: 50,
+                    child: Image.network(
+                      item['file_1'],
+                      fit: BoxFit.cover, // Ensures the image fills the container
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   Text(
                     item['title'] ?? 'Item ${index + 1}',
@@ -502,88 +526,56 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
 
 
 
-  // Future<void> _saveProfileAsContact() async {
-  //   if (await FlutterContacts.requestPermission()) {
-  //     // Create a new contact with full details
-  //     final newContact = Contact(
-  //       name: Name(first: _nameController.text),
-  //       phones: [Phone(_phoneController.text)],
-  //       emails: [Email(_emailController.text)],
-  //       organizations: [
-  //         Organization(
-  //           company: _entrepriseController.text, // Company name
-  //           title: _fonctionController.text,     // Job title
-  //         )
-  //       ],
-  //       addresses: [
-  //         Address(
-  //           _localisationController.text,
-  //           label: AddressLabel.home, // Address label (optional)
-  //           street: '',
-  //           city: 'Abidjan',         // City (example)
-  //           state: '', // State (example)
-  //           postalCode: '',    // Postal code (example)
-  //           country: "Cote d'Ivoire",      // Country (example)
-  //         )
-  //       ],
-  //       websites: [Website(_siteController.text)],
-  //     );
-  //
-  //     try {
-  //       // Save the contact to the phone's contact list
-  //       await FlutterContacts.insertContact(newContact);
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Contact enregistré avec succès')),
-  //       );
-  //     } catch (e) {
-  //       ScaffoldMessenger.of(context).showSnackBar(
-  //         SnackBar(content: Text('Erreur lors de l\'enregistrement du contact')),
-  //       );
-  //     }
-  //   }
-  // }
-
   Future<void> _saveProfileAsContact() async {
     if (await FlutterContacts.requestPermission()) {
-      // Créer un nouveau contact avec toutes les informations
       final newContact = Contact(
         name: Name(first: _nameController.text),
         phones: [Phone(_phoneController.text)],
         emails: [Email(_emailController.text)],
         organizations: [
           Organization(
-            company: _entrepriseController.text, // Nom de l'entreprise
-            title: _fonctionController.text,      // Titre du poste
-          )
+            company: _entrepriseController.text,
+            title: _fonctionController.text,
+          ),
         ],
         addresses: [
           Address(
             _localisationController.text,
             label: AddressLabel.home,
-          )
+          ),
         ],
         websites: [Website(_siteController.text)],
-        socialMedias: [
-          // SocialMedia(
-          //   type: FontAwesomeIcons.facebook,
-          //   userName: _facebookController.text, // Use .text to get the string value
-          // ),
-          // SocialMedia(
-          //   type: FontAwesomeIcons.whatsapp,
-          //   userName: _whatsappController.text, // Use .text to get the string value
-          // ),
-        ],
+        // socialMedias: [
+        //   SocialMedia(
+        //     userName: _facebookController.text,
+        //     label: SocialMediaLabel.facebook,
+        //   ),
+        //   SocialMedia(
+        //     userName: _whatsappController.text,
+        //     label: SocialMediaLabel.whatsapp,
+        //   ),
+        //   SocialMedia(
+        //     userName: _linkedinController.text,
+        //     label: SocialMediaLabel.linkedin,
+        //   ),
+        // ],
       );
 
-      // Ajouter une photo
-      if (_selectedProfileImage != null) {
-        // Convertir l'image en bytes
-        final bytes = await _selectedProfileImage!.readAsBytes();
-        newContact.photo = bytes; // Attribuer les bytes de l'image au contact
+      // Fetch the image from the URL if available
+      if (_profileImageController.text.isNotEmpty) {
+        try {
+          final response = await http.get(Uri.parse(_profileImageController.text));
+          if (response.statusCode == 200) {
+            newContact.photo = response.bodyBytes; // Assign image bytes to contact's photo
+          } else {
+            print('Failed to load profile image from URL');
+          }
+        } catch (e) {
+          print('Error fetching image: $e');
+        }
       }
 
       try {
-        // Enregistrer le contact dans la liste de contacts du téléphone
         await FlutterContacts.insertContact(newContact);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Contact enregistré avec succès')),
@@ -595,6 +587,5 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
       }
     }
   }
-
 }
 

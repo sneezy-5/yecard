@@ -23,9 +23,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     try {
       final response = await _profileRepository.profile();
       if (response['success']) {
-        print("PROFILE ${response['data']}");
         final profileData = ProfileData.fromJson(response['data']);
-        emit(state.copyWith(isLoading: false, profileData: profileData, isSuccess: true));
+        emit(state.copyWith(isLoading: false, profileData: profileData, isSuccess: true, error:null));
         emit(ProfileLoaded(profileData: profileData));
       } else {
         emit(state.copyWith(isLoading: false, error: response['error']));
@@ -40,34 +39,13 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   }
 
 
-  Future<void> _onFetchPortfolio(FetchPortfolio event, Emitter<ProfileState> emit) async {
-    emit(ProfileLoading());
-    // emit(state.copyWith(isLoading: true));
-
-    try {
-      final response = await _portfolioRepository.portfolio();
-      if (response['success']) {
-        print("PORTFOLIO: ${response['data']}");
-        final portfolioData = PortfolioData.fromJson(response['data']);
-        emit(state.copyWith(isLoading: false, portfolioData: portfolioData, isSuccess: true));
-        emit(PortfolioLoaded(portfolioData: portfolioData));
-      } else {
-        emit(state.copyWith(isLoading: false, error: response['error']));
-        emit(ProfileError(message: "Failed to load portfolio"));
-
-      }
-    } catch (e) {
-      emit(state.copyWith(isLoading: false, error: 'Erreur lors du chargement du profil'));
-    }
-  }
-
   // Gestion de l'événement UpdateProfile
   Future<void> _onUpdateProfile(UpdateProfile event, Emitter<ProfileState> emit) async {
     emit(state.copyWith(isLoading: true));
     try {
       final response = await _profileRepository.updateProfile(event.profileData, event.profileData.id, event.picture, event.banier);
       if (response['success']) {
-        emit(state.copyWith(isLoading: false, isSuccess: true, profileData: event.profileData, message: response["message"], error: ''));
+        emit(state.copyWith(isLoading: false, isSuccess: true, profileData: event.profileData, message: response["message"], error: null));
       } else {
         emit(state.copyWith(isLoading: false, error: response['error']));
       }

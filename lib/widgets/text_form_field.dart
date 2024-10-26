@@ -6,7 +6,7 @@ class CustomTextFormField extends StatelessWidget {
   final TextEditingController textController;
   final String? errorText;
   final bool readOnly;
-
+  final TextInputType keyboardType; // New parameter for keyboard type
 
   const CustomTextFormField({
     super.key,
@@ -14,7 +14,8 @@ class CustomTextFormField extends StatelessWidget {
     required this.textController,
     this.maxLines = 1,
     this.errorText,
-    this.readOnly =false,
+    this.readOnly = false,
+    this.keyboardType = TextInputType.text, // Default to TextInputType.text
   });
 
   @override
@@ -23,6 +24,7 @@ class CustomTextFormField extends StatelessWidget {
       controller: textController,
       maxLines: maxLines,
       readOnly: readOnly,
+      keyboardType: keyboardType, // Set the keyboard type here
       decoration: InputDecoration(
         errorText: errorText,
         filled: true,
@@ -41,13 +43,6 @@ class CustomTextFormField extends StatelessWidget {
         hintText: hintText,
         hintStyle: const TextStyle(color: Colors.grey),
       ),
-    //     if (errorText != null) ...[
-    // SizedBox(height: 5),
-    // Text(
-    // errorText!,
-    // style: TextStyle(color: Colors.red, fontSize: 12),
-    // ),
-    // ],
     );
   }
 }

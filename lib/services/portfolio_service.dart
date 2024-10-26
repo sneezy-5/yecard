@@ -6,7 +6,7 @@ import '../models/portfolio.dart';
 
 class PortfolioService {
   // final String _baseUrl = 'https://yecard.pro';
-  final String _baseUrl = 'http://192.168.1.18:8000';
+  final String _baseUrl = 'http://192.168.180.199:8000';
 
   Future<Map<String, dynamic>> getPortfolio() async {
     try {
@@ -49,7 +49,7 @@ class PortfolioService {
     }
   }
 
-  Future<Map<String, dynamic>> getContactPortfolio(String id) async {
+  Future<Map<String, dynamic>> getContactPortfolio(int id) async {
     try {
       String? token = await UserPreferences.getUserToken();
       if (token == null) {
@@ -57,7 +57,7 @@ class PortfolioService {
       }
 
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/v0/portfolio/?p=$id'),
+        Uri.parse('$_baseUrl/api/v0/portfolios/list/?p=$id'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
@@ -77,7 +77,13 @@ class PortfolioService {
           'success': false,
           'error': "Accès non autorisé. Veuillez vous reconnecter.",
         };
-      } else {
+      }else if (response.statusCode == 413) {
+        return {
+          'success': false,
+          'error': "Votre fichier est trop lourd.",
+        };
+      }
+      else {
         return _handleErrorResponse(response);
       }
     } catch (e) {
@@ -116,9 +122,9 @@ class PortfolioService {
       if (file2 != null) {
         request.files.add(await http.MultipartFile.fromPath('file_url2', file2.path));
       }
-      // if (file3 != null) {
-      //   request.files.add(await http.MultipartFile.fromPath('file_url3', file3.path));
-      // }
+      if (file3 != null) {
+        request.files.add(await http.MultipartFile.fromPath('file_url3', file3.path));
+      }
 
       var response = await request.send();
       final responseBody = await response.stream.bytesToString();
@@ -127,7 +133,7 @@ class PortfolioService {
         print("Portfolio créé avec succès");
         return {
           'success': true,
-          'data': jsonDecode(utf8.decode(responseBody.codeUnits)),
+          'data': 'Portfolio créé avec succès',
           'message': 'Portfolio créé avec succès',
         };
       } else {

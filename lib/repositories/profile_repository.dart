@@ -20,6 +20,9 @@ class ProfileRepository {
   Future<Map<String, dynamic>>contact (int id) async {
     return await _profileService.getContact(id);
   }
+  Future<Map<String, dynamic>>contactCheck (int id) async {
+    return await _profileService.contactChect(id);
+  }
   Future<Map<String, dynamic>>updateProfile (ProfileData profileData, int id, File? picture, File? banier) async {
     return await _profileService.updateProfile(profileData, id, picture, banier);
   }

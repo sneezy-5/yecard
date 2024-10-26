@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -25,7 +27,9 @@ class _CardScreenState extends State<CardScreen> {
   final _emailController = TextEditingController();
   final _localisationController = TextEditingController();
   final _profileImageController = TextEditingController();
+  late final PageController _pageController;
 
+  Timer? _timer;
   bool isLoading = true; // Added loading flag
   late int id;
   List portfolioItems = [];
@@ -35,6 +39,20 @@ class _CardScreenState extends State<CardScreen> {
     super.initState();
     // Fetch profile data when the screen is loaded
     BlocProvider.of<ProfileBloc>(context).add(FetchProfile());
+    _pageController = PageController();
+
+    // Start auto-scroll timer
+    _timer = Timer.periodic(Duration(seconds: 2), (timer) {
+      if (_pageController.hasClients) {
+        int nextPage = _pageController.page!.toInt() + 1;
+        _pageController.animateToPage(
+          nextPage,
+          duration: Duration(milliseconds: 1500), // Slower scroll animation
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+
   }
 
   void _onDrawerOpened() {
@@ -191,33 +209,34 @@ class _CardScreenState extends State<CardScreen> {
                     ],
                   ),
                 ),
-                SizedBox(
-                  height: 90,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemBuilder: (context, index) {
-                      int actualIndex = index % 2;
+        SizedBox(
+    height: 90,
+    child: PageView.builder(
+    controller: _pageController,
+    scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) {
+      int actualIndex = index % 2;
 
-                      return Container(
-                        width: 380,
-                        margin: EdgeInsets.symmetric(horizontal: 6),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.black),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        clipBehavior: Clip.hardEdge,
-                        child: Image.asset(
-                          actualIndex == 0
-                              ? 'assets/images/slice1.png'
-                              : 'assets/images/slice2.png',
-                          fit: BoxFit.cover,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
-                      );
-                    },
-                  ),
-                ),
+      return Container(
+        width: 380,
+        margin: EdgeInsets.symmetric(horizontal: 6),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.black),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: Image.asset(
+          actualIndex == 0
+              ? 'assets/images/slice1.png'
+              : 'assets/images/slice2.png',
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+      );
+    },
+    ),
+    ),
                 SizedBox(height: 30),
                 Card(
                   shape: RoundedRectangleBorder(

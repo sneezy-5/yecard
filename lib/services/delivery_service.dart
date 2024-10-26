@@ -6,7 +6,7 @@ import '../models/delivery_zone.dart';
 
 class DeliveryService {
   // final String _baseUrl = 'https://yecard.pro';
-  final String _baseUrl = 'http://192.168.1.18:8000';
+  final String _baseUrl = 'http://192.168.180.199:8000';
 
   Future<Map<String, dynamic>> addDelivery(DeliveryZone deliveryData) async {
     print("DATA ${deliveryData.toJson()}");

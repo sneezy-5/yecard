@@ -75,7 +75,8 @@ class _PortfolioFormScreenState extends State<PortfolioView> {
                   buttonText: 'OK',
                   onButtonPressed: () {
                     Navigator.of(context).pop();
-                    AppRoutes.pushReplacement(context, AppRoutes.appProfile);
+                    Navigator.of(context).pop();
+                    //AppRoutes.pushReplacement(context, AppRoutes.appProfile);
                   },
                 );
               },

@@ -6,7 +6,7 @@ import '../models/login_model.dart';
 
 class LoginService {
   // final String _baseUrl = 'https://yecard.pro';
-  final String _baseUrl = 'http://192.168.1.18:8000';
+  final String _baseUrl = 'http://192.168.180.199:8000';
 
   Future<Map<String, dynamic>> login(LoginModelData loginData) async {
     print("DATA ${loginData.toJson()}");
@@ -29,6 +29,8 @@ class LoginService {
         final responseBody = jsonDecode(response.body);
         // Sauvegarde le token
         await UserPreferences.saveUserToken(responseBody["access"]);
+
+
         return {
           'success': true,
           'message': "login sucess",
