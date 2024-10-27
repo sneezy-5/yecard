@@ -49,6 +49,8 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
           isLoading: false,
           errorMessages: result['errors'] ?? {},
         ));
+        emit(state.copyWith(isLoading: false,errorMessage:"",errorMessages:{}));
+
       }
     } catch (e) {
       print("Erreur capturée lors de l'appel API : $e");

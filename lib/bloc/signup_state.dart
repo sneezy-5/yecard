@@ -7,7 +7,7 @@ class SignupState extends Equatable {
   final bool isLoading;
   final bool isSuccess;
   final String? errorMessage;
-  final Map<String, List<String>> errorMessages;
+   final Map<String, List<String>> errorMessages;
 
   const SignupState({
     this.currentStep = 1,

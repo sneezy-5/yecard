@@ -22,7 +22,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
     try {
       final result = await _loginRepository.login(event.loginModelData);
       if (result['success']) {
-        emit(state.copyWith(isLoading: false, isSuccess: true,errorMessage:"",errorMessages:{}));
+        emit(state.copyWith(isLoading: false, isSuccess: true,errorMessage:null,errorMessages:{}));
 
 
       } else {
@@ -31,7 +31,7 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
         emit(state.copyWith(
           isLoading: false,
           errorMessages: result['errors'] ?? {},
-          errorMessage: result['error']?? "",
+          errorMessage: result['error']?? null,
         ));
       }
     } catch (e) {

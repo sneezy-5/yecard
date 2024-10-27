@@ -85,6 +85,7 @@ class CreatePasswordWiev extends StatelessWidget {
               listener: (context, state) {
                 if (state.isSuccess) {
                   showDialog(
+                    barrierDismissible: false,
                     context: context,
                     builder: (BuildContext context) {
                       return CustomPopup(

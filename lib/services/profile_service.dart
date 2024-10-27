@@ -5,8 +5,8 @@ import 'package:yecard/models/profile_model.dart';
 import 'package:yecard/services/user_preference.dart';
 
 class ProfileService {
-  // final String _baseUrl = 'https://yecard.pro';
-  final String _baseUrl = 'http://192.168.180.199:8000';
+  final String _baseUrl = 'https://yecard.pro';
+  // final String _baseUrl = 'http://192.168.153.199:8000';
 
   // Méthode pour récupérer le profil avec un appel GET
   Future<Map<String, dynamic>> getProfile() async {

@@ -453,6 +453,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               Navigator.of(context).pushNamed(
                 '/app/portfolio_detail',
                 arguments: {
+                  'id': item['id'],
                   'title': item['title'],
                   'description': item['description'],
                   'mot_de_fin': item['mot_de_fin'],

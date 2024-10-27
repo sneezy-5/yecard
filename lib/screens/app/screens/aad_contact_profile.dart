@@ -81,13 +81,20 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
     });
     _fetchData();
   }
-
   Future<void> _fetchData() async {
     try {
       final getprofileResponse = await _profileRepository.profile();
       final profileResponse = await _profileRepository.contactProfile(args?['id']);
+
+      // Check if profileResponse is null or unsuccessful before proceeding
+      if (profileResponse == null || !profileResponse['success']) {
+        _showUserPopup("Error", "Utilisateur introuvable");
+        return; // Early return if the profile is not found
+      }
+
       final contactCheckResponse = await _profileRepository.contactCheck(profileResponse['data']['id']); // Check if contact is already saved
       final portfolioResponse = await _portfolioRepository.getContactPortfolio(profileResponse['data']['id']);
+
       setState(() {
         print("PROFILE: $profileResponse");
         print("PORTFOLIO: $portfolioResponse");
@@ -97,27 +104,22 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
         if (portfolioResponse != null && portfolioResponse['success']) {
           if (portfolioResponse['data'] != null) {
             // Process portfolio data here
-            // Example: portfolioItems = portfolioResponse['data'];
             portfolioItems = portfolioResponse['data']['results'];
-
           }
         }
 
         // Handling profile response
-        if (profileResponse != null && profileResponse['success']) {
-          final profileData = ProfileData.fromJson(profileResponse['data']);
-          id = profileData.id;
-          final userId = getprofileResponse['data']['id'];
-          _fillProfileData(profileData);
-          print("ID $userId");
-          if (id==userId)
-            Navigator.of(context).pop();
-              // AppRoutes.pushReplacement(context, AppRoutes.appProfile);
-            Navigator.of(context).pushNamed('/app/profile');
-        } else {
-          // If profile data is empty, display a popup
-          _showUserPopup("Error", "Utilisateur introuvable");
+        final profileData = ProfileData.fromJson(profileResponse['data']);
+        id = profileData.id;
+        final userId = getprofileResponse['data']['id'];
+        _fillProfileData(profileData);
+
+        // Check if the fetched id matches the user id
+        if (id == userId) {
+          Navigator.of(context).pop();
+          Navigator.of(context).pushNamed('/app/profile');
         }
+
         _isAlreadySaved = contactCheckResponse != null && contactCheckResponse['data']['exists'] == true;
 
         isLoading = false;
@@ -130,9 +132,58 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
     }
   }
 
+  // Future<void> _fetchData() async {
+  //   try {
+  //     final getprofileResponse = await _profileRepository.profile();
+  //     final profileResponse = await _profileRepository.contactProfile(args?['id']);
+  //     final contactCheckResponse = await _profileRepository.contactCheck(profileResponse['data']['id']); // Check if contact is already saved
+  //     final portfolioResponse = await _portfolioRepository.getContactPortfolio(profileResponse['data']['id']);
+  //     setState(() {
+  //       print("PROFILE: $profileResponse");
+  //       print("PORTFOLIO: $portfolioResponse");
+  //       print("CONTACT: $contactCheckResponse");
+  //
+  //       // Handling portfolio response
+  //       if (portfolioResponse != null && portfolioResponse['success']) {
+  //         if (portfolioResponse['data'] != null) {
+  //           // Process portfolio data here
+  //           // Example: portfolioItems = portfolioResponse['data'];
+  //           portfolioItems = portfolioResponse['data']['results'];
+  //
+  //         }
+  //       }
+  //
+  //       // Handling profile response
+  //       if (profileResponse != null && profileResponse['success']) {
+  //         final profileData = ProfileData.fromJson(profileResponse['data']);
+  //         id = profileData.id;
+  //         final userId = getprofileResponse['data']['id'];
+  //         _fillProfileData(profileData);
+  //         print("ID $userId");
+  //         if (id==userId)
+  //           Navigator.of(context).pop();
+  //             // AppRoutes.pushReplacement(context, AppRoutes.appProfile);
+  //           Navigator.of(context).pushNamed('/app/profile');
+  //       } else {
+  //         // If profile data is empty, display a popup
+  //         _showUserPopup("Error", "Utilisateur introuvable");
+  //       }
+  //       _isAlreadySaved = contactCheckResponse != null && contactCheckResponse['data']['exists'] == true;
+  //
+  //       isLoading = false;
+  //     });
+  //   } catch (e) {
+  //     print('Error fetching profile or portfolio data: $e');
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //   }
+  // }
+
   void _showUserPopup(String title, String content) {
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return CustomPopup(
           title: title,
@@ -359,6 +410,11 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
             _isAlreadySaved
               ? SizedBox.shrink() // Hide button if already saved
               : ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.symmetric(vertical: 16.0),
+              ),
             onPressed: () async {
               setState(() => _isSaving = true);
               ContactData contactData = ContactData(from_user: 1, to_user: id);
@@ -368,7 +424,8 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
                 _isSaving = false;
                 if (response["success"] == true) {
                   _isAlreadySaved = true;
-                  _showUserPopup("Success", "Contact enregistré");
+                  // _showUserPopup("Success", "Contact enregistré");
+                  showSuccessPopup(context);
                 }
               });
             },
@@ -452,7 +509,7 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
           return GestureDetector(
             onTap: () {
               Navigator.of(context).pushNamed(
-                '/app/portfolio_detail',
+                '/app/portfolio_detail_add',
                 arguments: {
                   'title': item['title'],
                   'description': item['description'],
@@ -545,20 +602,20 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
           ),
         ],
         websites: [Website(_siteController.text)],
-        // socialMedias: [
-        //   SocialMedia(
-        //     userName: _facebookController.text,
-        //     label: SocialMediaLabel.facebook,
-        //   ),
-        //   SocialMedia(
-        //     userName: _whatsappController.text,
-        //     label: SocialMediaLabel.whatsapp,
-        //   ),
-        //   SocialMedia(
-        //     userName: _linkedinController.text,
-        //     label: SocialMediaLabel.linkedin,
-        //   ),
-        // ],
+        socialMedias: [
+          SocialMedia(
+            _facebookController.text,
+            label: SocialMediaLabel.facebook,
+          ),
+          SocialMedia(
+            _whatsappController.text,
+            label: SocialMediaLabel.whatsapp,
+          ),
+          SocialMedia(
+            _linkedinController.text,
+            label: SocialMediaLabel.linkedIn,
+          ),
+        ],
       );
 
       // Fetch the image from the URL if available
@@ -587,5 +644,6 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
       }
     }
   }
+
 }
 

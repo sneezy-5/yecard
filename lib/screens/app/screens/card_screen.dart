@@ -10,6 +10,7 @@ import '../../../bloc/profile_state.dart';
 import '../../../models/profile_model.dart';
 import '../../../routes.dart';
 import '../../../services/user_preference.dart';
+import '../../../widgets/profil_card.dart';
 
 class CardScreen extends StatefulWidget {
   @override
@@ -238,22 +239,34 @@ class _CardScreenState extends State<CardScreen> {
     ),
     ),
                 SizedBox(height: 30),
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pushNamed('/app/profile');
-                      },
-                      child: Image.network(
-                        _profileImageController.text,
-                        width: 270,
-                        height: 330,
-                      ),
-                    ),
+                // Card(
+                //   shape: RoundedRectangleBorder(
+                //     borderRadius: BorderRadius.circular(16.0),
+                //   ),
+                //   child: Padding(
+                //     padding: const EdgeInsets.all(8.0),
+                //     child: GestureDetector(
+                //       onTap: () {
+                //         Navigator.of(context).pushNamed('/app/profile');
+                //       },
+                //       child: Image.network(
+                //         _profileImageController.text,
+                //         width: 270,
+                //         height: 330,
+                //       ),
+                //     ),
+                //   ),
+                // ),
+                SizedBox(
+                  height: 350,
+                  child: ProfileCard(
+                    profileImageUrl: _profileImageController.text,
+                    name: _nameController.text.isNotEmpty
+                        ? _nameController.text
+                        : 'Nom inconnu',
+                    position: _fonctionController.text.isNotEmpty
+                        ? _fonctionController.text
+                        : 'Fonction inconnue',
                   ),
                 ),
                 SizedBox(height: 20),

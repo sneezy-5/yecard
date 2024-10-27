@@ -5,8 +5,8 @@ import 'package:yecard/services/user_preference.dart';
 import '../models/contact_model.dart';
 
 class ContactService {
-  // final String _baseUrl = 'https://yecard.pro';
-  final String _baseUrl = 'http://192.168.180.199:8000';
+  final String _baseUrl = 'https://yecard.pro';
+  // final String _baseUrl = 'http://192.168.153.199:8000';
 
   Future<Map<String, dynamic>> getContactProfile(String id, String page) async {
     try {
@@ -53,7 +53,7 @@ class ContactService {
     }
   }
 
-  Future<Map<String, dynamic>> getContacts() async {
+  Future<Map<String, dynamic>> getContacts({int page = 0, String? query}) async {
     try {
       String? token = await UserPreferences.getUserToken();
 
@@ -61,18 +61,25 @@ class ContactService {
         throw Exception("Token non disponible");
       }
 
+      // Build the URL with optional pagination and search query
+      final uri = Uri.parse('$_baseUrl/api/v0/contacts/').replace(
+        queryParameters: {
+          'offset': page.toString(),
+          if (query != null && query.isNotEmpty) 'search': query,
+        },
+      );
+print("URI $uri");
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/v0/contacts/'),
+        uri,
         headers: {
-          'Content-Type': 'application/json; charset=UTF-8', // Ensure UTF-8 encoding
+          'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',
         },
       );
 
-
       if (response.statusCode == 200) {
-        final responseBody = jsonDecode(utf8.decode(response.bodyBytes)); // Handle UTF-8 encoding
-        print("data : ${responseBody["results"]}");
+        final responseBody = jsonDecode(utf8.decode(response.bodyBytes));
+        print("Data: ${responseBody}");
         return {
           'success': true,
           'data': responseBody["results"],
@@ -83,12 +90,10 @@ class ContactService {
           'error': "Accès non autorisé. Veuillez vous reconnecter.",
         };
       } else {
-        print("data : yjtyjtyfj");
-
-        final responseBody = jsonDecode(utf8.decode(response.bodyBytes)); // Handle UTF-8 encoding
+        final responseBody = jsonDecode(utf8.decode(response.bodyBytes));
         return {
           'success': false,
-          'errors': "User dose not exist"
+          'error': responseBody["message"] ?? "Une erreur est survenue",
         };
       }
     } catch (e) {
@@ -99,7 +104,6 @@ class ContactService {
       };
     }
   }
-
   Future<Map<String, dynamic>> addContact(ContactData contactData) async {
     print("DATA ${contactData.toJson()}");
     try {

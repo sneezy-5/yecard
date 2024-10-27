@@ -41,7 +41,7 @@ import '../models/signup_model.dart';
 
 class SignupService {
   final String _baseUrl = 'https://yecard.pro';
-  // final String _baseUrl = 'http://192.168.152.200:8000';
+  // final String _baseUrl = 'http://192.168.153.199:8000';
 
 
   Future<Map<String, dynamic>> signup(SignupData signupData) async {

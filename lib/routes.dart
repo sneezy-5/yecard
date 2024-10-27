@@ -8,7 +8,9 @@ import 'package:yecard/screens/app/screens/card_order.dart';
 import 'package:yecard/screens/app/screens/code_qr_screen.dart';
 import 'package:yecard/screens/app/screens/contact_profile.dart';
 import 'package:yecard/screens/app/screens/portfolio_details.dart';
+import 'package:yecard/screens/app/screens/portfolio_details_add.dart';
 import 'package:yecard/screens/app/screens/profile_screen.dart';
+import 'package:yecard/screens/app/screens/update_portfolio.dart';
 import 'package:yecard/screens/home_sccreen.dart';
 import 'package:yecard/screens/login_screen.dart';
 import 'package:yecard/screens/signup_create_password.dart';
@@ -27,7 +29,9 @@ class AppRoutes {
   static const String appProfile = '/app/profile';
   static const String appAddCard= '/app/add_card';
   static const String appPortfolioDetail = '/app/portfolio_detail';
+  static const String appPortfolioDetailAdd = '/app/portfolio_detail_add';
   static const String appAddPortfolio = '/app/add_portfolio';
+  static const String appEditPortfolio = '/app/portfolio_edit';
   static const String appGetOrder = '/app/order';
   static const String appGetQrcode = '/app/qr_code_screen';
   static const String appAddContactProfile = '/app/add_contact_profile';
@@ -59,7 +63,16 @@ class AppRoutes {
         return MaterialPageRoute(
           builder: (_) => PortfolioDetailScreen(args: args),
         );
-
+      case appPortfolioDetailAdd:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => PortfolioDetailAddScreen(args: args),
+        );
+      case appEditPortfolio:
+        final args = settings.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(
+          builder: (_) => PortfolioFormEditScreen(args: args),
+        );
       case appAddContactProfile:
         final args = settings.arguments as Map<String, dynamic>?;
         return MaterialPageRoute(

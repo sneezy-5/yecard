@@ -53,6 +53,7 @@ class SignupView extends StatelessWidget {
               loginRepository.login(loginData);
               showDialog(
                 context: context,
+                barrierDismissible: false,
                 builder: (BuildContext context) {
                   // Check if the cardNumberController has some text
                   if (cardNumberController.text.isNotEmpty) {
@@ -90,6 +91,7 @@ class SignupView extends StatelessWidget {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(state.errorMessage!)),
               );
+
             }
 
             DefaultTabController.of(context)?.animateTo(state.currentStep - 1);

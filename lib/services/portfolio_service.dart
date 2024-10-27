@@ -5,8 +5,8 @@ import 'package:yecard/services/user_preference.dart';
 import '../models/portfolio.dart';
 
 class PortfolioService {
-  // final String _baseUrl = 'https://yecard.pro';
-  final String _baseUrl = 'http://192.168.180.199:8000';
+  final String _baseUrl = 'https://yecard.pro';
+  // final String _baseUrl = 'http://192.168.153.199:8000';
 
   Future<Map<String, dynamic>> getPortfolio() async {
     try {
@@ -148,7 +148,7 @@ class PortfolioService {
     }
   }
 
-  Future<Map<String, dynamic>> updatePortfolio(PortfolioData updateData, int id, File? imageFile) async {
+  Future<Map<String, dynamic>> updatePortfolio(PortfolioData updateData, int id, File? file1, File? file2, File? file3) async {
     try {
       String? token = await UserPreferences.getUserToken();
       if (token == null) {
@@ -164,22 +164,29 @@ class PortfolioService {
       request.headers['Content-Type'] = 'multipart/form-data; charset=UTF-8';
 
       request.fields.addAll({
-        'title': utf8.encode(updateData.title).toString(),
-        'description': utf8.encode(updateData.description).toString(),
-        'mot_de_fin': utf8.encode(updateData.mot_de_fin).toString(),
+        'title': updateData.title,
+        'description': updateData.description,
+        'mot_de_fin': updateData.mot_de_fin,
       });
 
-      if (imageFile != null) {
-        request.files.add(await http.MultipartFile.fromPath('file_url1', imageFile.path));
+      if (file1 != null) {
+        request.files.add(await http.MultipartFile.fromPath('file_url1', file1.path));
+      }
+      if (file2 != null) {
+        request.files.add(await http.MultipartFile.fromPath('file_url2', file2.path));
+      }
+      if (file3 != null) {
+        request.files.add(await http.MultipartFile.fromPath('file_url3', file3.path));
       }
 
+      print("FILE $file1");
       var response = await request.send();
       final responseBody = await response.stream.bytesToString();
 
       if (response.statusCode == 200) {
         return {
           'success': true,
-          'data': jsonDecode(utf8.decode(responseBody.codeUnits)),
+          'data': 'Portfolio mis à jour avec succès',
           'message': 'Portfolio mis à jour avec succès',
         };
       } else {

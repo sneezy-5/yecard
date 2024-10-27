@@ -4,11 +4,11 @@ import '../../../routes.dart';
 import '../../../widgets/app_bar.dart';
 import '../../../widgets/detail_widget.dart';
 
-class PortfolioDetailScreen extends StatelessWidget {
+class PortfolioDetailAddScreen extends StatelessWidget {
   final Map<String, dynamic>? args;
 
   // Constructor to retrieve args
-  PortfolioDetailScreen({Key? key, this.args}) : super(key: key);
+  PortfolioDetailAddScreen({Key? key, this.args}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,25 +19,7 @@ class PortfolioDetailScreen extends StatelessWidget {
         showBackButton: true,
         customBackIcon: Icons.arrow_back_ios,
         actions: [
-          IconButton(
-            icon: Icon(Icons.edit),
-            color: Colors.white,
-            onPressed: () {
 
-              Navigator.of(context).pushNamed(
-                '/app/portfolio_edit',
-                arguments: {
-                  'id': args?['id'],
-                  'title': args?['title'],
-                  'description': args?['description'],
-                  'mot_de_fin': args?['mot_de_fin'],
-                  'file_1': args?['file_1'],
-                  'file_2': args?['file_2'],
-                  'file_3': args?['file_3']
-                },
-              );
-            },
-          ),
         ],
       ),
       body: Center(

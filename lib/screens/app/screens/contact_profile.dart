@@ -354,7 +354,7 @@ class _CProfileScreenState extends State<ContactProfileWiew>
           return GestureDetector(
             onTap: () {
               Navigator.of(context).pushNamed(
-                '/app/portfolio_detail',
+                '/app/portfolio_detail_add',
                 arguments: {
                   'title': item['title'],
                   'description': item['description'],
