@@ -255,7 +255,6 @@ class _ContactsScreenState extends State<ContactsScreen> {
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
   ContactService contactService = ContactService();
-
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -263,7 +262,6 @@ class _ContactsScreenState extends State<ContactsScreen> {
     super.initState();
     _fetchContacts();
 
-    // Listen to scroll events to trigger pagination
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200 &&
           !_isLoadingMore &&
@@ -272,10 +270,13 @@ class _ContactsScreenState extends State<ContactsScreen> {
       }
     });
 
-    // Listen to search input changes and reset contacts
     _searchController.addListener(() {
       _searchQuery = _searchController.text;
-      _resetAndFetchContacts();
+      if (_searchQuery.isEmpty) {
+        _resetAndFetchContacts();
+      } else {
+        _resetAndFetchContacts(query: _searchQuery);
+      }
     });
   }
 
@@ -289,6 +290,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
       if (response['success']) {
         setState(() {
+          if (_currentPage == 0) _contacts.clear(); // Efface les contacts pour la recherche
           _contacts.addAll(response['data']);
           _currentPage++;
           _hasMore = response['data'].isNotEmpty;
@@ -303,11 +305,12 @@ class _ContactsScreenState extends State<ContactsScreen> {
     }
   }
 
-  void _resetAndFetchContacts() {
+  void _resetAndFetchContacts({String query = ''}) {
     setState(() {
       _contacts.clear();
-      _currentPage = 1;
+      _currentPage = 0;
       _hasMore = true;
+      _searchQuery = query;
     });
     _fetchContacts();
   }
@@ -317,7 +320,7 @@ class _ContactsScreenState extends State<ContactsScreen> {
     return Scaffold(
       appBar: ReusableAppBar(
         title: 'Relation',
-        showBackButton:false,
+        showBackButton: false,
         customBackIcon: Icons.arrow_back_ios,
         actions: [
           IconButton(
@@ -352,7 +355,9 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
             // List of contacts with pagination and search
             Expanded(
-              child: ListView.builder(
+              child: _contacts.isEmpty && !_isLoadingMore
+                  ? Center(child: Text('Aucun résultat trouvé'))
+                  : ListView.builder(
                 controller: _scrollController,
                 itemCount: _contacts.length + (_isLoadingMore ? 1 : 0),
                 itemBuilder: (context, index) {
@@ -364,8 +369,8 @@ class _ContactsScreenState extends State<ContactsScreen> {
                     leading: CircleAvatar(
                       backgroundImage: NetworkImage(contact['to_user']['profile_image'] ?? ''),
                     ),
-                    title: Text(contact['to_user']['name'] ?? 'Unknown'),
-                    subtitle: Text(contact['to_user']['fonction'] ?? 'Unknown role'),
+                    title: Text(contact['to_user']['name'] ?? 'Inconnu'),
+                    subtitle: Text(contact['to_user']['fonction'] ?? 'Rôle inconnu'),
                     trailing: Icon(Icons.more_vert),
                     onTap: () {
                       Navigator.of(context).pushNamed('/app/contact_profile', arguments: {

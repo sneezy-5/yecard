@@ -432,6 +432,67 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
 
 
 
+  // Widget _buildPortfolioTab() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(16.0),
+  //     child: portfolioItems.isEmpty
+  //         ? Center(child: Text('No Portfolio Data'))
+  //         : GridView.builder(
+  //       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+  //         crossAxisCount: 2,
+  //         crossAxisSpacing: 10,
+  //         mainAxisSpacing: 10,
+  //         childAspectRatio: 3 / 2,
+  //       ),
+  //       itemCount: portfolioItems.length,
+  //       itemBuilder: (context, index) {
+  //         final item = portfolioItems[index];
+  //         return GestureDetector(
+  //           onTap: () {
+  //             // Navigator.of(context).pushNamed('/app/portfolio_detail');
+  //             Navigator.of(context).pushNamed(
+  //               '/app/portfolio_detail',
+  //               arguments: {
+  //                 'id': item['id'],
+  //                 'title': item['title'],
+  //                 'description': item['description'],
+  //                 'mot_de_fin': item['mot_de_fin'],
+  //                 'file_1': item['file_1'],
+  //                 'file_2': item['file_2'],
+  //                 'file_3': item['file_3']
+  //               },
+  //             );
+  //
+  //           },
+  //           child: Card(
+  //             elevation: 2,
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.center,
+  //               mainAxisAlignment: MainAxisAlignment.center,
+  //               children: [
+  //                 Container(
+  //                   width: 200,
+  //                   height: 50,
+  //                   child: Image.network(
+  //                     item['file_1'],
+  //                     fit: BoxFit.cover, // Ensures the image fills the container
+  //                   ),
+  //                 ),
+  //
+  //                 SizedBox(height: 10),
+  //                 Text(
+  //                   item['title'] ?? 'Item ${index + 1}',
+  //                   style: TextStyle(fontSize: 16),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
+
   Widget _buildPortfolioTab() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -449,7 +510,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           final item = portfolioItems[index];
           return GestureDetector(
             onTap: () {
-              // Navigator.of(context).pushNamed('/app/portfolio_detail');
               Navigator.of(context).pushNamed(
                 '/app/portfolio_detail',
                 arguments: {
@@ -462,7 +522,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                   'file_3': item['file_3']
                 },
               );
-
+            },
+            onLongPress: () {
+              _showDeleteConfirmationDialog(index, item['id']);
             },
             child: Card(
               elevation: 2,
@@ -475,10 +537,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                     height: 50,
                     child: Image.network(
                       item['file_1'],
-                      fit: BoxFit.cover, // Ensures the image fills the container
+                      fit: BoxFit.cover,
                     ),
                   ),
-
                   SizedBox(height: 10),
                   Text(
                     item['title'] ?? 'Item ${index + 1}',
@@ -492,6 +553,40 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       ),
     );
   }
+
+  void _showDeleteConfirmationDialog(int index,int id) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Supprimer'),
+          content: Text('Voulez-vous vraiment supprimer cet élément ?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Annuler'),
+            ),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  portfolioItems.removeAt(index);
+                  _portfolioRepository.deletePortfolio(id);
+                });
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                'Supprimer',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildEditableTextField(
       TextEditingController controller, int maxLines, {TextInputType keyboardType = TextInputType.text}) {
     return TextField(
@@ -508,20 +603,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
-  // Widget _buildEditableTextField(TextEditingController controller, int maxLines) {
-  //   return TextField(
-  //     controller: controller,
-  //     maxLines: maxLines,
-  //     keyboardType: TextInputType.number,
-  //     decoration: InputDecoration(
-  //       filled: true,
-  //       fillColor: Colors.white,
-  //       border: UnderlineInputBorder(),
-  //       hintText: 'Edit text',
-  //       hintStyle: TextStyle(color: Colors.grey),
-  //     ),
-  //   );
-  // }
 
   Widget _buildReadOnlyTextField(String text) {
     return Text(text.isNotEmpty ? text : 'Non spécifié');

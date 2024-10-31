@@ -201,6 +201,41 @@ class PortfolioService {
     }
   }
 
+  Future<Map<String, dynamic>> deletePortfolio(int id) async {
+    try {
+      String? token = await UserPreferences.getUserToken();
+      if (token == null) {
+        throw Exception("Token non disponible");
+      }
+
+      final url = Uri.parse('$_baseUrl/api/v0/portfolio/$id/');
+      final response = await http.delete(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 202) {
+        print("STATUS ${response.statusCode}");
+        return {
+          'success': true,
+          'data': 'Portfolio supprimé avec succès',
+          'message': 'Portfolio supprimé avec succès',
+        };
+      } else {
+        print("STATUSERROR ${response.body}");
+        return _handleResponseErrors(response.statusCode, response.body);
+      }
+    } catch (e) {
+      print("Erreur lors de l'appel DELETE : $e");
+      return {
+        'success': false,
+        'error': 'Erreur lors de l\'appel API : $e',
+      };
+    }
+  }
   // Utility to handle error responses
   Map<String, dynamic> _handleErrorResponse(http.Response response) {
     try {

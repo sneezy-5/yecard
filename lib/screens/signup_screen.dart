@@ -343,7 +343,7 @@ class SignupView extends StatelessWidget {
                       email: email,
                       localisation: location,
                       hasCard: hasCard,
-                      cardNumber: cardNumber,
+                      cardNumber: hasCard==true ? cardNumber : null,
                       password: 'password',
                     );
 

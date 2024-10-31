@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../bloc/profile_bloc.dart';
 import '../../../bloc/profile_event.dart';
@@ -104,16 +105,20 @@ class _CardScreenState extends State<CardScreen> {
                 children: [
                   SizedBox(height: 40),
                   Center(
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(60.0),
-                      ),
-                      child: Image.network(
-                        _profileImageController.text,
-                        width: 95,
-                        height: 95,
-                      ),
+                    child:CircleAvatar(
+                      radius: 50,
+                      backgroundImage:  NetworkImage(_profileImageController.text)
                     ),
+                    // Card(
+                    //   shape: RoundedRectangleBorder(
+                    //     borderRadius: BorderRadius.circular(80.0),
+                    //   ),
+                    //   child: Image.network(
+                    //     _profileImageController.text,
+                    //     width: 95,
+                    //     height: 95,
+                    //   ),
+                    // ),
                   ),
                   Text(
                     _nameController.text.isNotEmpty
@@ -158,7 +163,12 @@ class _CardScreenState extends State<CardScreen> {
                 ),
                 title: Text("Partager l'application"),
                 onTap: () {
-                  Navigator.pop(context);
+                  // Navigator.pop(context);
+                  final String appLink = 'https://example.com/app-link';
+                  Share.share(
+                    'Découvrez cette application incroyable! Téléchargez-la ici: $appLink',
+                    subject: 'Mon code QR et lien de l\'application',
+                  );
                 },
               ),
               SizedBox(height: 300),
@@ -219,17 +229,17 @@ class _CardScreenState extends State<CardScreen> {
       int actualIndex = index % 2;
 
       return Container(
-        width: 380,
+        width: 360,
         margin: EdgeInsets.symmetric(horizontal: 6),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.black),
+          // border: Border.all(color: Colors.black),
           borderRadius: BorderRadius.circular(16),
         ),
         clipBehavior: Clip.hardEdge,
         child: Image.asset(
           actualIndex == 0
-              ? 'assets/images/slice1.png'
-              : 'assets/images/slice2.png',
+              ? 'assets/images/slice3.png'
+              : 'assets/images/slice4.png',
           fit: BoxFit.cover,
           width: double.infinity,
           height: double.infinity,
@@ -239,24 +249,6 @@ class _CardScreenState extends State<CardScreen> {
     ),
     ),
                 SizedBox(height: 30),
-                // Card(
-                //   shape: RoundedRectangleBorder(
-                //     borderRadius: BorderRadius.circular(16.0),
-                //   ),
-                //   child: Padding(
-                //     padding: const EdgeInsets.all(8.0),
-                //     child: GestureDetector(
-                //       onTap: () {
-                //         Navigator.of(context).pushNamed('/app/profile');
-                //       },
-                //       child: Image.network(
-                //         _profileImageController.text,
-                //         width: 270,
-                //         height: 330,
-                //       ),
-                //     ),
-                //   ),
-                // ),
                 SizedBox(
                   height: 350,
                   child: ProfileCard(
@@ -282,7 +274,7 @@ class _CardScreenState extends State<CardScreen> {
                       backgroundColor: Colors.green,
                     ),
                     child: const Text(
-                      'Commander sa carte de visite physique',
+                      'Commander la carte à 5.000 f cfa',
                       style: TextStyle(
                         fontSize: 15,
                         color: Colors.white,

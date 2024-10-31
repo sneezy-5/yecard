@@ -89,7 +89,7 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
       // Check if profileResponse is null or unsuccessful before proceeding
       if (profileResponse == null || !profileResponse['success']) {
         _showUserPopup("Error", "Utilisateur introuvable");
-        return; // Early return if the profile is not found
+        return;
       }
 
       final contactCheckResponse = await _profileRepository.contactCheck(profileResponse['data']['id']); // Check if contact is already saved
@@ -256,7 +256,7 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
                       ],
                     ),
                     SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.5,
+                      height: MediaQuery.of(context).size.height * 0.6,
                       child: TabBarView(
                         controller: _tabController,
                         children: [

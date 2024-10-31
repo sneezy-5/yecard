@@ -51,8 +51,8 @@ dependencies:
 
 
 
-flutter_launcher_icons:
-  android: true
+flutter_icons:
+  android: "launcher_icon"
   ios: true
   image_path: "assets/icons/icon.png"
   remove_alpha_ios: true
@@ -101,6 +101,8 @@ flutter:
      - assets/images/slide1.png
      - assets/images/slice1.png
      - assets/images/slice2.png
+     - assets/images/slice3.png
+     - assets/images/slice4.png
   #     - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

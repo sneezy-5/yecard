@@ -21,4 +21,7 @@ class PortfolioRepository {
   Future<Map<String, dynamic>>updatePortfolio (PortfolioData portfolioData, int id,File? file1, File? file2, File? file3) async {
     return await _portfolioService.updatePortfolio(portfolioData, id, file1, file2, file3);
   }
+  Future<Map<String, dynamic>>deletePortfolio ( int id) async {
+    return await _portfolioService.deletePortfolio( id);
+  }
 }

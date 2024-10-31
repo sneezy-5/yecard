@@ -12,7 +12,7 @@ class SignupData {
   final String email;
   final String localisation;
   final bool hasCard;
-  final String cardNumber;
+  final String? cardNumber;
   final String password;
 
   SignupData({
