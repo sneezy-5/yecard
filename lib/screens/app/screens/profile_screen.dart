@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:yecard/repositories/portfolio_repository.dart';
 import 'package:yecard/services/portfolio_service.dart';
 import '../../../bloc/profile_bloc.dart';
@@ -119,7 +120,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
         setState(() {
           portfolioItems = responses['data'];
           _isPortfolioLoaded = true;
-          // isLoading = false;
+          isLoading = false;
         });
       }
     } catch (e) {
@@ -307,13 +308,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
+
   Widget _buildAboutTab() {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          // Section Biographie
+          // Biographie Section
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -325,7 +327,8 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 onPressed: () {
                   if (_isEditing) {
                     _saveProfile();
-                  }                  setState(() {
+                  }
+                  setState(() {
                     _isEditing = !_isEditing;
                   });
                 },
@@ -339,7 +342,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
               ? _buildEditableTextField(_biographieController, 5)
               : _buildReadOnlyTextField(_biographieController.text),
 
-          // Autres champs (Nom, Email, Fonction, etc.)
+          // Other Fields (Name, Email, etc.)
           _buildFieldWithLabel(Icons.label, 'Nom', _nameController),
           _buildFieldWithLabel(Icons.mail_outline, 'Email', _emailController),
           _buildFieldWithLabel(Icons.work, 'Fonction', _fonctionController),
@@ -347,7 +350,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           _buildFieldWithLabel(Icons.language, 'Portfolio Site', _siteController),
           _buildFieldWithLabel(Icons.house, 'Domicile', _localisationController),
 
-          // Section Réseaux sociaux
+          // Social Media Section
           SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -356,22 +359,182 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                 'Mes réseaux sociaux',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-
             ],
           ),
           SizedBox(height: 10),
 
-          // Facebook
-          _buildSocialMediaField(Icons.facebook, 'Facebook', _facebookController),
-          // WhatsApp
-          _buildSocialMediaField(FontAwesomeIcons.whatsapp, 'WhatsApp', _whatsappController),
-          // LinkedIn
-          _buildSocialMediaField(FontAwesomeIcons.linkedin, 'LinkedIn', _linkedinController),
+          // Social Media Links
+          _buildSocialMediaField(Icons.facebook, 'Facebook', _facebookController, 'https://www.facebook.com/'),
+          _buildSocialMediaField(FontAwesomeIcons.whatsapp, 'WhatsApp', _whatsappController, 'https://wa.me/'),
+          _buildSocialMediaField(FontAwesomeIcons.linkedin, 'LinkedIn', _linkedinController, 'https://www.linkedin.com/in/'),
           SizedBox(height: 60),
         ],
       ),
     );
   }
+  Widget _buildSocialMediaField(IconData icon, String label, TextEditingController controller, String baseUrl) {
+    return GestureDetector(
+      onTap: () async {
+        final profileId = Uri.encodeComponent(controller.text.trim());
+        if (profileId.isNotEmpty) {
+          final url = '$baseUrl$profileId';
+          try {
+            if (await canLaunch(url)) {
+              await launch(url);
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Could not launch $url')),
+              );
+            }
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error launching URL: $e')),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Please enter your $label profile ID')),
+          );
+        }
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.blue),
+            SizedBox(width: 10),
+            Expanded(
+              child: TextFormField(
+                controller: controller,
+                decoration: InputDecoration(
+                  labelText: label,
+                  border: UnderlineInputBorder(),
+                  contentPadding: EdgeInsets.zero, // Adjust padding for cleaner look
+                ),
+                readOnly: !_isEditing,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget _buildSocialMediaField(IconData icon, String label, TextEditingController controller, String baseUrl) {
+  //   return GestureDetector(
+  //     onTap: () async {
+  //       final profileId = controller.text.trim();
+  //       if (profileId.isNotEmpty) {
+  //         final url = '$baseUrl$profileId';
+  //         if (await canLaunch(url)) {
+  //           await launch(url);
+  //         } else {
+  //           ScaffoldMessenger.of(context).showSnackBar(
+  //             SnackBar(content: Text('Could not launch $url')),
+  //           );
+  //         }
+  //       } else {
+  //         ScaffoldMessenger.of(context).showSnackBar(
+  //           SnackBar(content: Text('Please enter your $label profile ID')),
+  //         );
+  //       }
+  //     },
+  //     child: Padding(
+  //       padding: const EdgeInsets.symmetric(vertical: 8.0),
+  //       child: Row(
+  //         children: [
+  //           Icon(icon, color: Colors.blue),
+  //           SizedBox(width: 10),
+  //           Expanded(
+  //             child: TextFormField(
+  //               controller: controller,
+  //               decoration: InputDecoration(
+  //                 labelText: label,
+  //                 border: OutlineInputBorder(),
+  //               ),
+  //               readOnly: !_isEditing,
+  //               onTap: _isEditing ? null : () async {
+  //                 if (!_isEditing) {
+  //                   final profileId = controller.text.trim();
+  //                   final url = '$baseUrl$profileId';
+  //                   if (await canLaunch(url)) {
+  //                     await launch(url);
+  //                   }
+  //                 }
+  //               },
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
+
+  // Widget _buildAboutTab() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(10.0),
+  //     child: ListView(
+  //       padding: EdgeInsets.zero,
+  //       children: [
+  //         // Section Biographie
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             Text(
+  //               'Biographie',
+  //               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  //             ),
+  //             IconButton(
+  //               onPressed: () {
+  //                 if (_isEditing) {
+  //                   _saveProfile();
+  //                 }                  setState(() {
+  //                   _isEditing = !_isEditing;
+  //                 });
+  //               },
+  //               icon: Icon(_isEditing ? Icons.check : Icons.edit),
+  //               tooltip: _isEditing ? 'Save' : 'Edit',
+  //             ),
+  //           ],
+  //         ),
+  //         SizedBox(height: 10),
+  //         _isEditing
+  //             ? _buildEditableTextField(_biographieController, 5)
+  //             : _buildReadOnlyTextField(_biographieController.text),
+  //
+  //         // Autres champs (Nom, Email, Fonction, etc.)
+  //         _buildFieldWithLabel(Icons.label, 'Nom', _nameController),
+  //         _buildFieldWithLabel(Icons.mail_outline, 'Email', _emailController),
+  //         _buildFieldWithLabel(Icons.work, 'Fonction', _fonctionController),
+  //         _buildFieldWithLabel(Icons.phone, 'Phone', _phoneController),
+  //         _buildFieldWithLabel(Icons.language, 'Portfolio Site', _siteController),
+  //         _buildFieldWithLabel(Icons.house, 'Domicile', _localisationController),
+  //
+  //         // Section Réseaux sociaux
+  //         SizedBox(height: 20),
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             Text(
+  //               'Mes réseaux sociaux',
+  //               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  //             ),
+  //
+  //           ],
+  //         ),
+  //         SizedBox(height: 10),
+  //
+  //         // Facebook
+  //         _buildSocialMediaField(Icons.facebook, 'Facebook', _facebookController),
+  //         // WhatsApp
+  //         _buildSocialMediaField(FontAwesomeIcons.whatsapp, 'WhatsApp', _whatsappController),
+  //         // LinkedIn
+  //         _buildSocialMediaField(FontAwesomeIcons.linkedin, 'LinkedIn', _linkedinController),
+  //         SizedBox(height: 60),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildFieldWithLabel(IconData icon, String label, TextEditingController controller, {TextInputType keyboardType = TextInputType.text}) {
     if (icon == Icons.phone) {
@@ -403,95 +566,9 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
     );
   }
 
-  Widget _buildSocialMediaField(IconData icon, String label, TextEditingController controller) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0), // Add some vertical padding
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 30),
-          SizedBox(width: 10), // Space between icon and text
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                _isEditing
-                    ? _buildEditableTextField(controller, 1)
-                    : _buildReadOnlyTextField(controller.text),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
 
 
-  // Widget _buildPortfolioTab() {
-  //   return Padding(
-  //     padding: const EdgeInsets.all(16.0),
-  //     child: portfolioItems.isEmpty
-  //         ? Center(child: Text('No Portfolio Data'))
-  //         : GridView.builder(
-  //       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-  //         crossAxisCount: 2,
-  //         crossAxisSpacing: 10,
-  //         mainAxisSpacing: 10,
-  //         childAspectRatio: 3 / 2,
-  //       ),
-  //       itemCount: portfolioItems.length,
-  //       itemBuilder: (context, index) {
-  //         final item = portfolioItems[index];
-  //         return GestureDetector(
-  //           onTap: () {
-  //             // Navigator.of(context).pushNamed('/app/portfolio_detail');
-  //             Navigator.of(context).pushNamed(
-  //               '/app/portfolio_detail',
-  //               arguments: {
-  //                 'id': item['id'],
-  //                 'title': item['title'],
-  //                 'description': item['description'],
-  //                 'mot_de_fin': item['mot_de_fin'],
-  //                 'file_1': item['file_1'],
-  //                 'file_2': item['file_2'],
-  //                 'file_3': item['file_3']
-  //               },
-  //             );
-  //
-  //           },
-  //           child: Card(
-  //             elevation: 2,
-  //             child: Column(
-  //               crossAxisAlignment: CrossAxisAlignment.center,
-  //               mainAxisAlignment: MainAxisAlignment.center,
-  //               children: [
-  //                 Container(
-  //                   width: 200,
-  //                   height: 50,
-  //                   child: Image.network(
-  //                     item['file_1'],
-  //                     fit: BoxFit.cover, // Ensures the image fills the container
-  //                   ),
-  //                 ),
-  //
-  //                 SizedBox(height: 10),
-  //                 Text(
-  //                   item['title'] ?? 'Item ${index + 1}',
-  //                   style: TextStyle(fontSize: 16),
-  //                 ),
-  //               ],
-  //             ),
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
 
   Widget _buildPortfolioTab() {
     return Padding(

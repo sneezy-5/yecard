@@ -12,6 +12,9 @@ class PortfolioRepository {
   Future<Map<String, dynamic>>portfolio () async {
     return await _portfolioService.getPortfolio();
   }
+  Future<Map<String, dynamic>>portfoliobyId (int id) async {
+    return await _portfolioService.getPortfolioById(id);
+  }
   Future<Map<String, dynamic>>getContactPortfolio (int id) async {
     return await _portfolioService.getContactPortfolio(id);
   }

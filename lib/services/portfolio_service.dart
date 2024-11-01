@@ -49,6 +49,47 @@ class PortfolioService {
     }
   }
 
+  Future<Map<String, dynamic>> getPortfolioById(int id) async {
+    try {
+      String? token = await UserPreferences.getUserToken();
+      if (token == null) {
+        throw Exception("Token non disponible");
+      }
+
+      final response = await http.get(
+        Uri.parse('$_baseUrl/api/v0/portfolio/$id'),
+        headers: {
+          'Content-Type': 'application/json; charset=UTF-8',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print("Statut de la réponse GET portfolio : ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(utf8.decode(response.bodyBytes));
+        print("datass : ${responseBody}");
+        return {
+          'success': true,
+          'data': responseBody,
+        };
+      } else if (response.statusCode == 401) {
+        return {
+          'success': false,
+          'error': "Accès non autorisé. Veuillez vous reconnecter.",
+        };
+      } else {
+        return _handleErrorResponse(response);
+      }
+    } catch (e) {
+      print("Erreur lors de l'appel GET : $e");
+      return {
+        'success': false,
+        'error': 'Erreur lors de l\'appel API : $e',
+      };
+    }
+  }
+
   Future<Map<String, dynamic>> getContactPortfolio(int id) async {
     try {
       String? token = await UserPreferences.getUserToken();
@@ -217,7 +258,7 @@ class PortfolioService {
         },
       );
 
-      if (response.statusCode == 202) {
+      if (response.statusCode == 204) {
         print("STATUS ${response.statusCode}");
         return {
           'success': true,
