@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yecard/models/login_model.dart';
-import 'package:yecard/services/login_service.dart';
 import '../bloc/signup_bloc.dart';
 import '../bloc/signup_event.dart';
 import '../bloc/signup_state.dart';
+import '../models/login_model.dart';
 import '../models/signup_model.dart';
 import '../repositories/login_repository.dart';
 import '../repositories/signup_repository.dart';
 import '../routes.dart';
+import '../services/login_service.dart';
 import '../services/signup_service.dart';
 import '../widgets/popup_widgets.dart';
 import '../widgets/text_form_field.dart';
@@ -35,7 +35,62 @@ class SignupView extends StatelessWidget {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
   final TextEditingController cardNumberController = TextEditingController();
-  final TextEditingController conditionController = TextEditingController(text: "Accepter les conditions de confidentialité et d’utilisation...");
+  final TextEditingController conditionController = TextEditingController(
+      text: "Politique de Confidentialité et Conditions d'Utilisation de YéCard\n"
+          "Dernière mise à jour : 1er novembre 2024\n\n"
+          "Bienvenue sur YéCard, une plateforme de cartes de visite numériques innovantes ! "
+          "Nous nous engageons à protéger vos informations personnelles et à offrir une expérience utilisateur sécurisée. "
+          "En utilisant notre application et nos services, vous acceptez les termes suivants.\n\n"
+
+          "1. Collecte et Utilisation des Données\n"
+          "1.1 Données Collectées\n"
+          "Pour une expérience optimale, YéCard peut collecter plusieurs types de données :\n"
+          "• Informations d'identification personnelle : nom, numéro de téléphone, adresse email, profession, entreprise, etc., nécessaires pour personnaliser votre carte de visite.\n"
+          "• Informations techniques : adresse IP, type d'appareil, système d'exploitation, utilisées pour améliorer notre service et assurer la sécurité de la plateforme.\n"
+          "• Données d'utilisation : interactions avec l'application, préférences, et historique d'utilisation, afin d’optimiser l’expérience et de fournir un meilleur service.\n\n"
+
+          "1.2 Finalités de la Collecte\n"
+          "Les données collectées sont utilisées pour :\n"
+          "• Créer et gérer votre compte et carte de visite numérique ;\n"
+          "• Améliorer la sécurité et la performance de l’application ;\n"
+          "• Personnaliser votre expérience utilisateur et vous fournir des services adaptés ;\n"
+          "• Répondre à vos questions et vous fournir une assistance.\n\n"
+
+          "2. Partage des Informations\n"
+          "Vos données ne seront jamais vendues, échangées ou transférées sans votre consentement, sauf dans les cas suivants :\n"
+          "• Prestataires de services tiers : nous pouvons partager des informations avec des partenaires de confiance qui nous aident à opérer notre plateforme (hébergement, service client), dans le strict respect de la confidentialité des données.\n"
+          "• Conformité légale : nous pourrions être amenés à divulguer vos informations en réponse à des exigences légales.\n\n"
+
+          "3. Sécurité des Données\n"
+          "Nous mettons en œuvre des mesures de sécurité rigoureuses pour protéger vos informations personnelles. Vos données sont stockées sur des serveurs sécurisés et seuls les employés autorisés peuvent y accéder dans le cadre de leurs fonctions.\n\n"
+
+          "4. Droits des Utilisateurs\n"
+          "Vous avez le droit de :\n"
+          "• Accéder à vos informations personnelles ;\n"
+          "• Demander la correction ou la suppression de vos données ;\n"
+          "• Retirer votre consentement au traitement de vos données à tout moment.\n"
+          "Pour exercer ces droits, contactez notre support à l'adresse suivante : support@yecard.pro.\n\n"
+
+          "5. Utilisation Acceptable de YéCard\n"
+          "En utilisant YéCard, vous vous engagez à :\n"
+          "• Ne pas utiliser la plateforme pour des activités frauduleuses, illégales ou non autorisées ;\n"
+          "• Respecter la vie privée et les données des autres utilisateurs ;\n"
+          "• Ne pas tenter de perturber ou compromettre la sécurité de la plateforme.\n"
+          "Toute violation de ces règles peut entraîner la suspension ou la résiliation de votre compte.\n\n"
+
+          "6. Cookies et Technologies Similaires\n"
+          "YéCard utilise des cookies pour collecter des informations non personnelles afin d’améliorer votre expérience. Vous pouvez gérer vos préférences en matière de cookies via les paramètres de votre navigateur.\n\n"
+
+          "7. Modifications de la Politique\n"
+          "Nous nous réservons le droit de modifier cette politique de confidentialité et d'utilisation. Les changements seront notifiés via l'application et mis à jour sur notre site. Nous vous encourageons à consulter régulièrement cette page pour rester informé des mises à jour.\n\n"
+
+          "8. Contact\n"
+          "Pour toute question ou demande concernant cette politique de confidentialité et d'utilisation, veuillez nous contacter à :\n"
+          "Email :\n"
+          "Adresse : YéCard, Abidjan Cocody Côte d'Ivoire.\n\n"
+
+          "En utilisant YéCard, vous confirmez avoir lu et accepté cette politique de confidentialité et les conditions d’utilisation."
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +111,7 @@ class SignupView extends StatelessWidget {
                 barrierDismissible: false,
                 builder: (BuildContext context) {
                   // Check if the cardNumberController has some text
-                  if (cardNumberController.text.isNotEmpty) {
+                  if (cardNumberController.text.isNotEmpty && state.hasCard) {
                     return CustomPopup(
                       title: 'Succès',
                       content: "Votre carte numéroté ${cardNumberController.text} a été liée à votre compte avec succès. Vous pouvez bénéficier de tous les avantages de notre service.",

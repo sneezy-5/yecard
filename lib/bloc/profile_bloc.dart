@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yecard/repositories/profile_repository.dart';
-import '../models/portfolio.dart';
 import '../repositories/portfolio_repository.dart';
+import '../repositories/profile_repository.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
 import '../models/profile_model.dart';
@@ -12,7 +11,6 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
   ProfileBloc( this._profileRepository, this._portfolioRepository) : super(const ProfileState()) {
     on<FetchProfile>(_onFetchProfile);
-    // on<FetchPortfolio>(_onFetchPortfolio);
     on<UpdateProfile>(_onUpdateProfile);
   }
 

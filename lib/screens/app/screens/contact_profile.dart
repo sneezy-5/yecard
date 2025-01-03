@@ -1,13 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:yecard/repositories/portfolio_repository.dart';
-import 'package:yecard/services/portfolio_service.dart';
-import '../../../models/contact_model.dart';
 import '../../../models/profile_model.dart';
+import '../../../repositories/portfolio_repository.dart';
 import '../../../repositories/profile_repository.dart';
 import '../../../services/contact_service.dart';
+import '../../../services/portfolio_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../services/user_preference.dart';
 import '../../../widgets/app_bar.dart';
@@ -182,7 +180,7 @@ class _CProfileScreenState extends State<ContactProfileWiew>
                           unselectedLabelColor: Colors.grey,
                           indicatorSize: TabBarIndicatorSize.tab,
                           tabs: const [
-                            Tab(text: 'About'),
+                            Tab(text: 'Profil'),
                             Tab(text: 'Portfolio'),
                           ],
                         ),

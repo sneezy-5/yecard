@@ -1,7 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yecard/bloc/login_state.dart';
-import 'package:yecard/bloc/login_event.dart';
+
 import '../repositories/login_repository.dart';
+import 'login_event.dart';
+import 'login_state.dart';
 
 class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final LoginRepository _loginRepository;
@@ -10,14 +11,13 @@ class LoginBloc extends Bloc<LoginEvent, LoginState> {
 
     on<SubmitLogin>(_onSubmitLogin);
     on<ClearError>((event, emit) {
-      emit(state.copyWith(errorMessage: ''));
+      emit(state.copyWith(errorMessage: null));
     });
   }
 
   void _onSubmitLogin(SubmitLogin event, Emitter<LoginState> emit) async {
-    print("Début de la soumission du formulaire");
 
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isLoading: true,errorMessage:null,errorMessages:{}));
 
     try {
       final result = await _loginRepository.login(event.loginModelData);

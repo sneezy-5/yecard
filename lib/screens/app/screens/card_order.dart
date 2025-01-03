@@ -70,9 +70,9 @@ class DeliveryView extends StatelessWidget {
             final errorMessage = state.errorMessages.entries
                 .map((entry) => '${entry.key}: ${entry.value.join(', ')}')
                 .join('\n');
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(errorMessage)),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text(errorMessage)),
+            // );
           }
         },
         child: BlocBuilder<DeliveryBloc, DeliveryState>(

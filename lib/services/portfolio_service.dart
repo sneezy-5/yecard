@@ -1,14 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:Yecard/services/user_preference.dart';
 import 'package:http/http.dart' as http;
-import 'package:yecard/services/user_preference.dart';
 import '../models/portfolio.dart';
 
 class PortfolioService {
   final String _baseUrl = 'https://yecard.pro';
   // final String _baseUrl = 'http://192.168.153.199:8000';
 
-  Future<Map<String, dynamic>> getPortfolio() async {
+  Future<Map<String, dynamic>> getPortfolio(int limit, int offset) async {
     try {
       String? token = await UserPreferences.getUserToken();
       if (token == null) {
@@ -16,7 +16,7 @@ class PortfolioService {
       }
 
       final response = await http.get(
-        Uri.parse('$_baseUrl/api/v0/portfolio/'),
+        Uri.parse('$_baseUrl/api/v0/portfolio/?limit=5&offset=${limit}&offset=${offset}'),
         headers: {
           'Content-Type': 'application/json; charset=UTF-8',
           'Authorization': 'Bearer $token',

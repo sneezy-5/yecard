@@ -12,30 +12,10 @@ class LinkCardBloc extends Bloc<LinkCardEvent, LinkCardState> {
     // on<SubmitCard>(_onFetchCard);
   }
 
-  // Future<void> _onFetchCard(FetchCard event, Emitter<LinkCardState> emit) async {
-  //   emit(state.copyWith(isLoading: true));
-  //   emit(CardLoading());
-  //   try {
-  //     final response = await _cardRepository.getCard();
-  //     if (response['success']) {
-  //       print("PROFILE ${response['data']}");
-  //       final cardData = CardData.fromJson(response['data']);
-  //       emit(state.copyWith(isLoading: false,));
-  //       emit(CardLoaded(cardData: cardData));
-  //     } else {
-  //       emit(state.copyWith(isLoading: false, error: response['error']));
-  //       // emit(ProfileError(message: "Failed to load profile"));
-  //
-  //     }
-  //   } catch (e) {
-  //     print("PROFILE ${e}");
-  //     emit(state.copyWith(isLoading: false, error: 'Erreur lors du chargement du profil'));
-  //   }
-  // }
 
   // Soumission du numéro de carte (avec gestion du chargement et des erreurs)
   Future<void> _onSubmitCard(SubmitCard event, Emitter<LinkCardState> emit) async {
-    emit(state.copyWith(isLoading: true, errorMessage: ''));
+    emit(state.copyWith(isLoading: true,errorMessage:null,errorMessages:{}));
 
     try {
 

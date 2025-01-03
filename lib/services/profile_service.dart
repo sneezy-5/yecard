@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:Yecard/services/user_preference.dart';
 import 'package:http/http.dart' as http;
-import 'package:yecard/models/profile_model.dart';
-import 'package:yecard/services/user_preference.dart';
+
+import '../models/profile_model.dart';
+
 
 class ProfileService {
   final String _baseUrl = 'https://yecard.pro';

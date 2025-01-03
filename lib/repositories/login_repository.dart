@@ -1,5 +1,5 @@
-import 'package:yecard/models/login_model.dart';
 
+import '../models/login_model.dart';
 import '../services/login_service.dart';
 
 class LoginRepository {

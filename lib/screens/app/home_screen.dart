@@ -1,11 +1,9 @@
+import 'package:Yecard/screens/app/screens/card_screen.dart';
+import 'package:Yecard/screens/app/screens/code_qr_screen.dart';
+import 'package:Yecard/screens/app/screens/contacts_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yecard/screens/app/screens/card_screen.dart';
-import 'package:yecard/screens/app/screens/code_qr_screen.dart';
-import 'package:yecard/screens/app/screens/contacts_screen.dart';
-
 import '../../bloc/profile_bloc.dart';
-import '../../bloc/profile_event.dart';
 import '../../repositories/portfolio_repository.dart';
 import '../../repositories/profile_repository.dart';
 import '../../services/portfolio_service.dart';

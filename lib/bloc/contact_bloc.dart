@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yecard/repositories/profile_repository.dart';
-import '../models/portfolio.dart';
 import '../repositories/portfolio_repository.dart';
+import '../repositories/profile_repository.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
 import '../models/profile_model.dart';
@@ -35,28 +34,6 @@ class ContactBloc extends Bloc<ProfileEvent, ProfileState> {
 
     } catch (e) {
       print("PROFILE ${e}");
-      emit(state.copyWith(isLoading: false, error: 'Erreur lors du chargement du profil'));
-    }
-  }
-
-
-  Future<void> _onFetchPortfolio(FetchPortfolio event, Emitter<ProfileState> emit) async {
-    emit(ProfileLoading());
-    // emit(state.copyWith(isLoading: true));
-
-    try {
-      final response = await _portfolioRepository.portfolio();
-      if (response['success']) {
-        print("PORTFOLIO: ${response['data']}");
-        final portfolioData = PortfolioData.fromJson(response['data']);
-        emit(state.copyWith(isLoading: false, portfolioData: portfolioData, isSuccess: true));
-        emit(PortfolioLoaded(portfolioData: portfolioData));
-      } else {
-        emit(state.copyWith(isLoading: false, error: response['error']));
-        emit(ProfileError(message: "Failed to load portfolio"));
-
-      }
-    } catch (e) {
       emit(state.copyWith(isLoading: false, error: 'Erreur lors du chargement du profil'));
     }
   }

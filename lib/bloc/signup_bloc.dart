@@ -1,6 +1,6 @@
+import 'package:Yecard/bloc/signup_event.dart';
+import 'package:Yecard/bloc/signup_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yecard/bloc/signup_event.dart';
-import 'package:yecard/bloc/signup_state.dart';
 import '../repositories/signup_repository.dart';
 
 class SignupBloc extends Bloc<SignupEvent, SignupState> {
@@ -34,22 +34,20 @@ class SignupBloc extends Bloc<SignupEvent, SignupState> {
     emit(state.copyWith(condition: event.condition));
   }
   void _onSubmitSignup(SubmitSignup event, Emitter<SignupState> emit) async {
-    print("Début de la soumission du formulaire");
-
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isLoading: true,errorMessage:null,errorMessages:{}));
 
     try {
       final result = await _signupRepository.signup(event.signupData);
       if (result['success']) {
-        emit(state.copyWith(isLoading: false, isSuccess: true,errorMessage:"",errorMessages:{}));
+        emit(state.copyWith(isLoading: false, isSuccess: true,errorMessage:null,errorMessages:{}));
       } else {
         print("Réponse de l'API : $result");
 
         emit(state.copyWith(
           isLoading: false,
           errorMessages: result['errors'] ?? {},
+          errorMessage: null
         ));
-        emit(state.copyWith(isLoading: false,errorMessage:"",errorMessages:{}));
 
       }
     } catch (e) {

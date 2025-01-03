@@ -26,9 +26,7 @@ class PasswordBloc extends Bloc<PasswordEvent, PasswordState> {
 
   void _onSubmitReset(
       SubmitResetPassword event, Emitter<PasswordState> emit) async {
-    print("Début de la soumission du formulaire");
-
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isLoading: true,errorMessage:null,errorMessages:{}));
 
     try {
 
@@ -38,17 +36,14 @@ class PasswordBloc extends Bloc<PasswordEvent, PasswordState> {
          emit(state.copyWith(errorMessage: 'Veuillez entrer un mot de passe.',isLoading: false));
       }else {
         final result = await _resetRepository.reset(event.passwordResetData);
-
+        emit(state.copyWith(errorMessage: null, errorMessages: {}));
         if (result['success']) {
-          print("HERE.... ");
           emit(state.copyWith(isLoading: false, isSuccess: true,errorMessage:"",errorMessages:{}));
         } else {
-          print("Réponse de l'API : $result");
-
           emit(state.copyWith(
             isLoading: false,
             errorMessages: result['errors'] ?? {},
-              errorMessage: result['errors']
+              errorMessage: result['errors']?? null
           ));
         }
       }

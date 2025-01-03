@@ -4,14 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:yecard/repositories/portfolio_repository.dart';
-import 'package:yecard/services/portfolio_service.dart';
 import '../../../bloc/profile_bloc.dart';
 import '../../../bloc/profile_event.dart';
 import '../../../bloc/profile_state.dart';
-import '../../../models/portfolio.dart';
 import '../../../models/profile_model.dart';
+import '../../../repositories/portfolio_repository.dart';
 import '../../../repositories/profile_repository.dart';
+import '../../../services/portfolio_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../widgets/app_bar.dart';
 
@@ -33,6 +32,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProviderStateMixin {
   final PortfolioRepository _portfolioRepository = PortfolioRepository(PortfolioService());
   late TabController _tabController;
+  final ScrollController _scrollController = ScrollController();
+
   int id = 0;
   bool _isOnPortfolioTab = false;
   List<dynamic> portfolioItems = [];
@@ -58,6 +59,11 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   final _whatsappController = TextEditingController();
   final _linkedinController = TextEditingController();
   bool _isPortfolioLoaded = false;
+
+  int limit = 5;
+  int offset = 0;
+  bool isLoadingMore = false;
+  bool hasMoreData = true;
 
   @override
   void initState() {
@@ -109,25 +115,61 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       });
     }
   }
-  Future<void> _loadPortfolio() async {
-    // setState(() {
-    //   isLoading = true;
-    // });
+  // Future<void> _loadPortfolio() async {
+  //   // setState(() {
+  //   //   isLoading = true;
+  //   // });
+  //
+  //   try {
+  //     final responses = await _portfolioRepository.portfolio();
+  //     if (responses['success']) {
+  //       setState(() {
+  //         portfolioItems = responses['data'];
+  //         _isPortfolioLoaded = true;
+  //         isLoading = false;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     setState(() {
+  //       isLoading = false;
+  //     });
+  //     print("Erreur lors du chargement du portfolio: $e");
+  //   }
+  // }
+
+  Future<void> _loadPortfolio({bool isInitialLoad = false}) async {
+    if (isLoadingMore || !hasMoreData) return;
+    setState(() {
+      isLoadingMore = true;
+      if (isInitialLoad) {
+        portfolioItems.clear();
+        offset = 0;
+      }
+    });
 
     try {
-      final responses = await _portfolioRepository.portfolio();
-      if (responses['success']) {
+      final response = await _portfolioRepository.portfolio(limit: limit, offset: offset);
+      if (response['success']) {
+        // final newItems = response['data'];
+        final newItems = response['data'] as List;
+
         setState(() {
-          portfolioItems = responses['data'];
-          _isPortfolioLoaded = true;
-          isLoading = false;
+          if (newItems.isNotEmpty) {
+            portfolioItems.addAll(newItems);
+            offset += newItems.length;
+          } else {
+            hasMoreData = false;
+          }
         });
+      } else {
+        hasMoreData = false;
       }
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
       print("Erreur lors du chargement du portfolio: $e");
+    } finally {
+      setState(() {
+        isLoadingMore = false;
+      });
     }
   }
   @override
@@ -152,9 +194,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
           setState(() {
             isLoading = false;
           });
-          // ScaffoldMessenger.of(context).showSnackBar(
-          //   SnackBar(content: Text(state.error)),
-          // );
+
         } else if (state.error.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.error)),
@@ -280,7 +320,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
                             unselectedLabelColor: Colors.grey,
                             indicatorSize: TabBarIndicatorSize.tab,
                             tabs: const [
-                              Tab(text: 'About'),
+                              Tab(text: 'Profil'),
                               Tab(text: 'Portfolio'),
                             ],
                           ),
@@ -382,14 +422,14 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
             if (await canLaunch(url)) {
               await launch(url);
             } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Could not launch $url')),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   SnackBar(content: Text('Could not launch $url')),
+              // );
             }
           } catch (e) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error launching URL: $e')),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(content: Text('Error launching URL: $e')),
+            // );
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -419,122 +459,6 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       ),
     );
   }
-
-  // Widget _buildSocialMediaField(IconData icon, String label, TextEditingController controller, String baseUrl) {
-  //   return GestureDetector(
-  //     onTap: () async {
-  //       final profileId = controller.text.trim();
-  //       if (profileId.isNotEmpty) {
-  //         final url = '$baseUrl$profileId';
-  //         if (await canLaunch(url)) {
-  //           await launch(url);
-  //         } else {
-  //           ScaffoldMessenger.of(context).showSnackBar(
-  //             SnackBar(content: Text('Could not launch $url')),
-  //           );
-  //         }
-  //       } else {
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           SnackBar(content: Text('Please enter your $label profile ID')),
-  //         );
-  //       }
-  //     },
-  //     child: Padding(
-  //       padding: const EdgeInsets.symmetric(vertical: 8.0),
-  //       child: Row(
-  //         children: [
-  //           Icon(icon, color: Colors.blue),
-  //           SizedBox(width: 10),
-  //           Expanded(
-  //             child: TextFormField(
-  //               controller: controller,
-  //               decoration: InputDecoration(
-  //                 labelText: label,
-  //                 border: OutlineInputBorder(),
-  //               ),
-  //               readOnly: !_isEditing,
-  //               onTap: _isEditing ? null : () async {
-  //                 if (!_isEditing) {
-  //                   final profileId = controller.text.trim();
-  //                   final url = '$baseUrl$profileId';
-  //                   if (await canLaunch(url)) {
-  //                     await launch(url);
-  //                   }
-  //                 }
-  //               },
-  //             ),
-  //           ),
-  //         ],
-  //       ),
-  //     ),
-  //   );
-  // }
-
-  // Widget _buildAboutTab() {
-  //   return Padding(
-  //     padding: const EdgeInsets.all(10.0),
-  //     child: ListView(
-  //       padding: EdgeInsets.zero,
-  //       children: [
-  //         // Section Biographie
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //           children: [
-  //             Text(
-  //               'Biographie',
-  //               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-  //             ),
-  //             IconButton(
-  //               onPressed: () {
-  //                 if (_isEditing) {
-  //                   _saveProfile();
-  //                 }                  setState(() {
-  //                   _isEditing = !_isEditing;
-  //                 });
-  //               },
-  //               icon: Icon(_isEditing ? Icons.check : Icons.edit),
-  //               tooltip: _isEditing ? 'Save' : 'Edit',
-  //             ),
-  //           ],
-  //         ),
-  //         SizedBox(height: 10),
-  //         _isEditing
-  //             ? _buildEditableTextField(_biographieController, 5)
-  //             : _buildReadOnlyTextField(_biographieController.text),
-  //
-  //         // Autres champs (Nom, Email, Fonction, etc.)
-  //         _buildFieldWithLabel(Icons.label, 'Nom', _nameController),
-  //         _buildFieldWithLabel(Icons.mail_outline, 'Email', _emailController),
-  //         _buildFieldWithLabel(Icons.work, 'Fonction', _fonctionController),
-  //         _buildFieldWithLabel(Icons.phone, 'Phone', _phoneController),
-  //         _buildFieldWithLabel(Icons.language, 'Portfolio Site', _siteController),
-  //         _buildFieldWithLabel(Icons.house, 'Domicile', _localisationController),
-  //
-  //         // Section Réseaux sociaux
-  //         SizedBox(height: 20),
-  //         Row(
-  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-  //           children: [
-  //             Text(
-  //               'Mes réseaux sociaux',
-  //               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-  //             ),
-  //
-  //           ],
-  //         ),
-  //         SizedBox(height: 10),
-  //
-  //         // Facebook
-  //         _buildSocialMediaField(Icons.facebook, 'Facebook', _facebookController),
-  //         // WhatsApp
-  //         _buildSocialMediaField(FontAwesomeIcons.whatsapp, 'WhatsApp', _whatsappController),
-  //         // LinkedIn
-  //         _buildSocialMediaField(FontAwesomeIcons.linkedin, 'LinkedIn', _linkedinController),
-  //         SizedBox(height: 60),
-  //       ],
-  //     ),
-  //   );
-  // }
 
   Widget _buildFieldWithLabel(IconData icon, String label, TextEditingController controller, {TextInputType keyboardType = TextInputType.text}) {
     if (icon == Icons.phone) {
@@ -567,69 +491,147 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
   }
 
 
-
-
-
   Widget _buildPortfolioTab() {
     return Padding(
       padding: const EdgeInsets.all(16.0),
-      child: portfolioItems.isEmpty
-          ? Center(child: Text('No Portfolio Data'))
-          : GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          childAspectRatio: 3 / 2,
-        ),
-        itemCount: portfolioItems.length,
-        itemBuilder: (context, index) {
-          final item = portfolioItems[index];
-          return GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushNamed(
-                '/app/portfolio_detail',
-                arguments: {
-                  'id': item['id'],
-                  'title': item['title'],
-                  'description': item['description'],
-                  'mot_de_fin': item['mot_de_fin'],
-                  'file_1': item['file_1'],
-                  'file_2': item['file_2'],
-                  'file_3': item['file_3']
+      child: Stack(
+        children: [
+          portfolioItems.isEmpty
+              ? Center(child: Text('No Portfolio Data'))
+              : GridView.builder(
+            controller: _scrollController,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 10,
+              mainAxisSpacing: 10,
+              childAspectRatio: 3 / 2,
+            ),
+            itemCount: portfolioItems.length + (hasMoreData ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == portfolioItems.length) {
+                return Center(child: CircularProgressIndicator());
+              }
+              final item = portfolioItems[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pushNamed(
+                    '/app/portfolio_detail',
+                    arguments: {
+                      'id': item['id'],
+                      'title': item['title'],
+                      'description': item['description'],
+                      'mot_de_fin': item['mot_de_fin'],
+                      'file_1': item['file_1'],
+                      'file_2': item['file_2'],
+                      'file_3': item['file_3'],
+                    },
+                  );
                 },
+                onLongPress: () {
+                  _showDeleteConfirmationDialog(index, item['id']);
+                },
+                child: Card(
+                  elevation: 2,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 200,
+                        height: 50,
+                        child: Image.network(
+                          item['file_1'],
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                         item['title'] != null && item['title'].length > 10
+                      ? item['title'].substring(0, 10) + '...'
+                      : item['title'],
+                  // item['title'] ?? 'Item ${index + 1}',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                ),
               );
             },
-            onLongPress: () {
-              _showDeleteConfirmationDialog(index, item['id']);
-            },
-            child: Card(
-              elevation: 2,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Container(
-                    width: 200,
-                    height: 50,
-                    child: Image.network(
-                      item['file_1'],
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    item['title'] ?? 'Item ${index + 1}',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                ],
-              ),
+          ),
+          if (isLoadingMore)
+            Positioned(
+              bottom: 16,
+              left: 0,
+              right: 0,
+              child: Center(child: CircularProgressIndicator()),
             ),
-          );
-        },
+        ],
       ),
     );
   }
+
+
+  //
+  // Widget _buildPortfolioTab() {
+  //   return Padding(
+  //     padding: const EdgeInsets.all(16.0),
+  //     child: portfolioItems.isEmpty
+  //         ? Center(child: Text('No Portfolio Data'))
+  //         : GridView.builder(
+  //       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+  //         crossAxisCount: 2,
+  //         crossAxisSpacing: 10,
+  //         mainAxisSpacing: 10,
+  //         childAspectRatio: 3 / 2,
+  //       ),
+  //       itemCount: portfolioItems.length,
+  //       itemBuilder: (context, index) {
+  //         final item = portfolioItems[index];
+  //         return GestureDetector(
+  //           onTap: () {
+  //             Navigator.of(context).pushNamed(
+  //               '/app/portfolio_detail',
+  //               arguments: {
+  //                 'id': item['id'],
+  //                 'title': item['title'],
+  //                 'description': item['description'],
+  //                 'mot_de_fin': item['mot_de_fin'],
+  //                 'file_1': item['file_1'],
+  //                 'file_2': item['file_2'],
+  //                 'file_3': item['file_3']
+  //               },
+  //             );
+  //           },
+  //           onLongPress: () {
+  //             _showDeleteConfirmationDialog(index, item['id']);
+  //           },
+  //           child: Card(
+  //             elevation: 2,
+  //             child: Column(
+  //               crossAxisAlignment: CrossAxisAlignment.center,
+  //               mainAxisAlignment: MainAxisAlignment.center,
+  //               children: [
+  //                 Container(
+  //                   width: 200,
+  //                   height: 50,
+  //                   child: Image.network(
+  //                     item['file_1'],
+  //                     fit: BoxFit.cover,
+  //                   ),
+  //                 ),
+  //                 SizedBox(height: 10),
+  //                 Text(
+  //                   item['title'] ?? 'Item ${index + 1}',
+  //                   style: TextStyle(fontSize: 16),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //         );
+  //       },
+  //     ),
+  //   );
+  // }
 
   void _showDeleteConfirmationDialog(int index,int id) {
     showDialog(

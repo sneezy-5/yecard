@@ -13,7 +13,7 @@ class DeliveryBloc extends Bloc<DeliveryEvent, DeliveryState> {
   void _onSubmitSignup(DeliveryZoneChanged event, Emitter<DeliveryState> emit) async {
     print("Début de la soumission du formulaire");
 
-    emit(state.copyWith(isLoading: true));
+    emit(state.copyWith(isLoading: true,errorMessage:null,errorMessages:{}));
 
     try {
       final result = await _deliveryRepository.addDelivery(event.deliveryZone);

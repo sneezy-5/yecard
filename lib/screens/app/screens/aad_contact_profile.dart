@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_contacts/flutter_contacts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
-import 'package:yecard/repositories/portfolio_repository.dart';
-import 'package:yecard/services/portfolio_service.dart';
 import '../../../models/contact_model.dart';
 import '../../../models/profile_model.dart';
+import '../../../repositories/portfolio_repository.dart';
 import '../../../repositories/profile_repository.dart';
 import '../../../routes.dart';
 import '../../../services/contact_service.dart';
+import '../../../services/portfolio_service.dart';
 import '../../../services/profile_service.dart';
 import '../../../services/user_preference.dart';
 import '../../../widgets/app_bar.dart';
@@ -132,53 +132,6 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
     }
   }
 
-  // Future<void> _fetchData() async {
-  //   try {
-  //     final getprofileResponse = await _profileRepository.profile();
-  //     final profileResponse = await _profileRepository.contactProfile(args?['id']);
-  //     final contactCheckResponse = await _profileRepository.contactCheck(profileResponse['data']['id']); // Check if contact is already saved
-  //     final portfolioResponse = await _portfolioRepository.getContactPortfolio(profileResponse['data']['id']);
-  //     setState(() {
-  //       print("PROFILE: $profileResponse");
-  //       print("PORTFOLIO: $portfolioResponse");
-  //       print("CONTACT: $contactCheckResponse");
-  //
-  //       // Handling portfolio response
-  //       if (portfolioResponse != null && portfolioResponse['success']) {
-  //         if (portfolioResponse['data'] != null) {
-  //           // Process portfolio data here
-  //           // Example: portfolioItems = portfolioResponse['data'];
-  //           portfolioItems = portfolioResponse['data']['results'];
-  //
-  //         }
-  //       }
-  //
-  //       // Handling profile response
-  //       if (profileResponse != null && profileResponse['success']) {
-  //         final profileData = ProfileData.fromJson(profileResponse['data']);
-  //         id = profileData.id;
-  //         final userId = getprofileResponse['data']['id'];
-  //         _fillProfileData(profileData);
-  //         print("ID $userId");
-  //         if (id==userId)
-  //           Navigator.of(context).pop();
-  //             // AppRoutes.pushReplacement(context, AppRoutes.appProfile);
-  //           Navigator.of(context).pushNamed('/app/profile');
-  //       } else {
-  //         // If profile data is empty, display a popup
-  //         _showUserPopup("Error", "Utilisateur introuvable");
-  //       }
-  //       _isAlreadySaved = contactCheckResponse != null && contactCheckResponse['data']['exists'] == true;
-  //
-  //       isLoading = false;
-  //     });
-  //   } catch (e) {
-  //     print('Error fetching profile or portfolio data: $e');
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //   }
-  // }
 
   void _showUserPopup(String title, String content) {
     showDialog(
@@ -229,49 +182,54 @@ class _CProfileScreenState extends State<AddContactProfileWiew>
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Stack(
-        children: [
-          Column(
-            children: [
-              _buildBannerImage(),
-            ],
-          ),
-          Column(
-            children: [
-              _buildProfileImage(),
-              DefaultTabController(
-                length: 2,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
+          :ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            Stack(
+              children: [
+                Column(
                   children: [
-                    TabBar(
-                      controller: _tabController,
-                      indicatorColor: Colors.green,
-                      labelColor: Colors.black,
-                      unselectedLabelColor: Colors.grey,
-                      indicatorSize: TabBarIndicatorSize.tab,
-                      tabs: const [
-                        Tab(text: 'About'),
-                        Tab(text: 'Portfolio'),
-                      ],
-                    ),
-                    SizedBox(
-                      height: MediaQuery.of(context).size.height * 0.6,
-                      child: TabBarView(
-                        controller: _tabController,
+                    _buildBannerImage(),
+                  ],
+                ),
+                Column(
+                  children: [
+                    _buildProfileImage(),
+                    DefaultTabController(
+                      length: 2,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          _buildAboutTab(),
-                          _buildPortfolioTab(),
+                          TabBar(
+                            controller: _tabController,
+                            indicatorColor: Colors.green,
+                            labelColor: Colors.black,
+                            unselectedLabelColor: Colors.grey,
+                            indicatorSize: TabBarIndicatorSize.tab,
+                            tabs: const [
+                              Tab(text: 'Profil'),
+                              Tab(text: 'Portfolio'),
+                            ],
+                          ),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.6,
+                            child: TabBarView(
+                              controller: _tabController,
+                              children: [
+                                _buildAboutTab(),
+                                _buildPortfolioTab(),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
+              ],
+            ),
+          ]),
+
     );
   }
 

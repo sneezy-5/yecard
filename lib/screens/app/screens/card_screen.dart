@@ -8,8 +8,11 @@ import 'package:share_plus/share_plus.dart';
 import '../../../bloc/profile_bloc.dart';
 import '../../../bloc/profile_event.dart';
 import '../../../bloc/profile_state.dart';
+import '../../../models/card_model.dart';
 import '../../../models/profile_model.dart';
+import '../../../repositories/card_repository.dart';
 import '../../../routes.dart';
+import '../../../services/card_service.dart';
 import '../../../services/user_preference.dart';
 import '../../../widgets/profil_card.dart';
 
@@ -31,6 +34,10 @@ class _CardScreenState extends State<CardScreen> {
   final _profileImageController = TextEditingController();
   late final PageController _pageController;
 
+  final CardRepository _cardRepository = CardRepository(CardService());
+
+  String? userQrData;
+
   Timer? _timer;
   bool isLoading = true; // Added loading flag
   late int id;
@@ -39,6 +46,7 @@ class _CardScreenState extends State<CardScreen> {
   @override
   void initState() {
     super.initState();
+    _fetchCardData();
     // Fetch profile data when the screen is loaded
     BlocProvider.of<ProfileBloc>(context).add(FetchProfile());
     _pageController = PageController();
@@ -57,6 +65,30 @@ class _CardScreenState extends State<CardScreen> {
 
   }
 
+  Future<void> _fetchCardData() async {
+    try {
+      final response = await _cardRepository.getCard();
+      if (response['success']) {
+        final cardData = CardData.fromJson(response['data'][0]);
+        setState(() {
+          userQrData = cardData.number.isNotEmpty ? cardData.number : "";
+          isLoading = false;
+        });
+      } else {
+        print("Error: ${response['message']}");
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error fetching card data: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+
   void _onDrawerOpened() {
     BlocProvider.of<ProfileBloc>(context).add(FetchProfile());
   }
@@ -73,7 +105,7 @@ class _CardScreenState extends State<CardScreen> {
         if (state is ProfileLoaded) {
           _fillProfileData(state.profileData);
           setState(() {
-            isLoading = false; // Stop loading when profile data is fetched
+            isLoading = false;
             id = state.profileData.id;
           });
         } else if (state is PortfolioLoaded) {
@@ -82,7 +114,7 @@ class _CardScreenState extends State<CardScreen> {
           });
         } else if (state is ProfileError) {
           setState(() {
-            isLoading = false; // Stop loading on error
+            isLoading = false;
           });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(state.error)),
@@ -164,7 +196,7 @@ class _CardScreenState extends State<CardScreen> {
                 title: Text("Partager l'application"),
                 onTap: () {
                   // Navigator.pop(context);
-                  final String appLink = 'https://example.com/app-link';
+                  final String appLink = 'https://play.google.com/store/apps/details?id=com.yecard.yecard';
                   Share.share(
                     'Découvrez cette application incroyable! Téléchargez-la ici: $appLink',
                     subject: 'Mon code QR et lien de l\'application',
@@ -273,16 +305,19 @@ class _CardScreenState extends State<CardScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
-                    child: const Text(
-                      'Commander la carte à 5.000 f cfa',
-                      style: TextStyle(
+                    child: Text(
+                      userQrData == null
+                          ? 'Commander la carte à 5.000 f cfa'
+                          : '',
+                      style: const TextStyle(
                         fontSize: 15,
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
                       ),
                       textAlign: TextAlign.center,
                     ),
-                  ),
+                  )
+
                 ),
                 SizedBox(height: 50),
               ],

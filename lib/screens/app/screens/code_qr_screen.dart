@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:yecard/services/card_service.dart';
 import '../../../models/card_model.dart';
 import '../../../repositories/card_repository.dart';
+import '../../../services/card_service.dart';
 
 class BusinessCardScreen extends StatefulWidget {
   const BusinessCardScreen({super.key});
