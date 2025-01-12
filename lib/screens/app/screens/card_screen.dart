@@ -33,6 +33,7 @@ class _CardScreenState extends State<CardScreen> {
   final _localisationController = TextEditingController();
   final _profileImageController = TextEditingController();
   late final PageController _pageController;
+  final String appLink = 'https://play.google.com/store/apps/details?id=com.yecard.yecard';
 
   final CardRepository _cardRepository = CardRepository(CardService());
 
@@ -186,8 +187,6 @@ class _CardScreenState extends State<CardScreen> {
                 ),
                 title: Text("Partager l'application"),
                 onTap: () {
-                  // Navigator.pop(context);
-                  final String appLink = 'https://play.google.com/store/apps/details?id=com.yecard.yecard';
                   Share.share(
                     'Découvrez cette application incroyable! Téléchargez-la ici: $appLink',
                     subject: 'Mon code QR et lien de l\'application',
@@ -296,9 +295,9 @@ class _CardScreenState extends State<CardScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.green,
                     ),
-                    child: Text(
+                    child: const Text(
                            'Commander la carte à 5.000 f cfa',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -312,15 +311,17 @@ class _CardScreenState extends State<CardScreen> {
                     height: 56,
                     child: ElevatedButton(
                       onPressed: () {
-                        AppRoutes.pushReplacement(
-                            context, AppRoutes.appGetOrder);
+                        Share.share(
+                          'Découvrez cette application incroyable! Téléchargez-la ici: $appLink',
+                          subject: 'Mon code QR et lien de l\'application',
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                       ),
-                      child: Text(
+                      child: const Text(
                         'Partager',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           color: Colors.white,
                           fontWeight: FontWeight.w700,

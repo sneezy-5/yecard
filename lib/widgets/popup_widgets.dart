@@ -22,7 +22,7 @@ class CustomPopup extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: onButtonPressed ?? () {
-            Navigator.of(context).pop(); // Fermer le popup par défaut
+            Navigator.of(context).pop();
           },
           child: Text(buttonText),
         ),
@@ -63,15 +63,7 @@ void showSuccessPopup(BuildContext context) {
                 backgroundColor: Colors.green,
                 child: Icon(Icons.check, color: Colors.white, size: 30),
               ),
-              // SizedBox(height: 20),
-              // Text(
-              //   '',
-              //   style: TextStyle(
-              //     fontSize: 18,
-              //     fontWeight: FontWeight.bold,
-              //     color: Colors.black87,
-              //   ),
-              // ),
+
               SizedBox(height: 8),
               Text(
                 'Viens d’être ajouté à tes contacts avec succès',
