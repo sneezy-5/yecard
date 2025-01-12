@@ -115,27 +115,7 @@ class _ProfileScreenState extends State<ProfileScreen> with SingleTickerProvider
       });
     }
   }
-  // Future<void> _loadPortfolio() async {
-  //   // setState(() {
-  //   //   isLoading = true;
-  //   // });
-  //
-  //   try {
-  //     final responses = await _portfolioRepository.portfolio();
-  //     if (responses['success']) {
-  //       setState(() {
-  //         portfolioItems = responses['data'];
-  //         _isPortfolioLoaded = true;
-  //         isLoading = false;
-  //       });
-  //     }
-  //   } catch (e) {
-  //     setState(() {
-  //       isLoading = false;
-  //     });
-  //     print("Erreur lors du chargement du portfolio: $e");
-  //   }
-  // }
+
 
   Future<void> _loadPortfolio({bool isInitialLoad = false}) async {
     if (isLoadingMore || !hasMoreData) return;

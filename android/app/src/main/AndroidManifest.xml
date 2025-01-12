@@ -34,7 +34,7 @@
     </queries>
 
     <application
-        android:label="yecard"
+        android:label="Yecard"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher_round">
         <activity

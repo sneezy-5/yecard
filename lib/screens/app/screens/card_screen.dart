@@ -52,7 +52,7 @@ class _CardScreenState extends State<CardScreen> {
     _pageController = PageController();
 
     // Start auto-scroll timer
-    _timer = Timer.periodic(Duration(seconds: 2), (timer) {
+    _timer = Timer.periodic(Duration(seconds: 6), (timer) {
       if (_pageController.hasClients) {
         int nextPage = _pageController.page!.toInt() + 1;
         _pageController.animateToPage(
@@ -141,16 +141,7 @@ class _CardScreenState extends State<CardScreen> {
                       radius: 50,
                       backgroundImage:  NetworkImage(_profileImageController.text)
                     ),
-                    // Card(
-                    //   shape: RoundedRectangleBorder(
-                    //     borderRadius: BorderRadius.circular(80.0),
-                    //   ),
-                    //   child: Image.network(
-                    //     _profileImageController.text,
-                    //     width: 95,
-                    //     height: 95,
-                    //   ),
-                    // ),
+
                   ),
                   Text(
                     _nameController.text.isNotEmpty
@@ -294,7 +285,7 @@ class _CardScreenState extends State<CardScreen> {
                   ),
                 ),
                 SizedBox(height: 20),
-                SizedBox(
+                userQrData == null? SizedBox(
                   width: 293,
                   height: 56,
                   child: ElevatedButton(
@@ -306,9 +297,7 @@ class _CardScreenState extends State<CardScreen> {
                       backgroundColor: Colors.green,
                     ),
                     child: Text(
-                      userQrData == null
-                          ? 'Commander la carte à 5.000 f cfa'
-                          : '',
+                           'Commander la carte à 5.000 f cfa',
                       style: const TextStyle(
                         fontSize: 15,
                         color: Colors.white,
@@ -317,6 +306,28 @@ class _CardScreenState extends State<CardScreen> {
                       textAlign: TextAlign.center,
                     ),
                   )
+
+                ) : SizedBox(
+                    width: 293,
+                    height: 56,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        AppRoutes.pushReplacement(
+                            context, AppRoutes.appGetOrder);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                      ),
+                      child: Text(
+                        'Partager',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    )
 
                 ),
                 SizedBox(height: 50),
