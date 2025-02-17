@@ -12,6 +12,7 @@ import '../../../models/card_model.dart';
 import '../../../models/profile_model.dart';
 import '../../../repositories/card_repository.dart';
 import '../../../routes.dart';
+import '../../../services/annonce_service.dart';
 import '../../../services/card_service.dart';
 import '../../../services/user_preference.dart';
 import '../../../widgets/profil_card.dart';
@@ -36,18 +37,20 @@ class _CardScreenState extends State<CardScreen> {
   final String appLink = 'https://play.google.com/store/apps/details?id=com.yecard.yecard';
 
   final CardRepository _cardRepository = CardRepository(CardService());
-
+  final AnnonceService _annonceService = AnnonceService();
   String? userQrData;
 
   Timer? _timer;
   bool isLoading = true; // Added loading flag
   late int id;
   List portfolioItems = [];
+  List<String> annonceImages = [];
 
   @override
   void initState() {
     super.initState();
     _fetchCardData();
+    _fetchAnnonceData();
     // Fetch profile data when the screen is loaded
     BlocProvider.of<ProfileBloc>(context).add(FetchProfile());
     _pageController = PageController();
@@ -55,20 +58,21 @@ class _CardScreenState extends State<CardScreen> {
     // Start auto-scroll timer
     _timer = Timer.periodic(Duration(seconds: 6), (timer) {
       if (_pageController.hasClients) {
-        int nextPage = _pageController.page!.toInt() + 1;
+        int nextPage = (_pageController.page!.toInt() + 1) % annonceImages.length;
         _pageController.animateToPage(
           nextPage,
-          duration: Duration(milliseconds: 1500), // Slower scroll animation
+          duration: Duration(milliseconds: 1500),
           curve: Curves.easeInOut,
         );
       }
     });
-
   }
+
 
   Future<void> _fetchCardData() async {
     try {
       final response = await _cardRepository.getCard();
+
       if (response['success']) {
         final cardData = CardData.fromJson(response['data'][0]);
         setState(() {
@@ -89,7 +93,34 @@ class _CardScreenState extends State<CardScreen> {
     }
   }
 
+  Future<void> _fetchAnnonceData() async {
+    try {
+      final response = await _annonceService.getAnnonce();
 
+      if (response['success']) {
+        final annonceData = response['data'];
+        print("DATA ANNONCE: ${annonceData}");
+        setState(() {
+          annonceImages = [
+            annonceData['picture_1'] as String? ?? '',
+            annonceData['picture_2'] as String? ?? '',
+            annonceData['picture_3'] as String? ?? '',
+            annonceData['picture_4'] as String? ?? ''
+          ].where((url) => url.isNotEmpty).toList();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error fetching card data: $e");
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
   void _onDrawerOpened() {
     BlocProvider.of<ProfileBloc>(context).add(FetchProfile());
   }
@@ -243,34 +274,37 @@ class _CardScreenState extends State<CardScreen> {
                   ),
                 ),
         SizedBox(
-    height: 90,
-    child: PageView.builder(
-    controller: _pageController,
-    scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) {
-      int actualIndex = index % 2;
+          height: 90,
+          child: PageView.builder(
+            controller: _pageController,
+            scrollDirection: Axis.horizontal,
+            itemCount: annonceImages.length,
+            itemBuilder: (context, index) {
+              if (annonceImages.isEmpty) {
+                return Center(child: Text("No images available"));
+              }
 
-      return Container(
-        width: 360,
-        margin: EdgeInsets.symmetric(horizontal: 6),
-        decoration: BoxDecoration(
-          // border: Border.all(color: Colors.black),
-          borderRadius: BorderRadius.circular(16),
+              int actualIndex = index % annonceImages.length;
+
+              return Container(
+                width: 360,
+                margin: EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                clipBehavior: Clip.hardEdge,
+                child: Image.network(
+                  annonceImages[actualIndex],
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              );
+            },
+          ),
         ),
-        clipBehavior: Clip.hardEdge,
-        child: Image.asset(
-          actualIndex == 0
-              ? 'assets/images/slice3.png'
-              : 'assets/images/slice4.png',
-          fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
-        ),
-      );
-    },
-    ),
-    ),
-                SizedBox(height: 30),
+
+        SizedBox(height: 30),
                 SizedBox(
                   height: 350,
                   child: ProfileCard(

@@ -1,0 +1,2 @@
+C:/Users/HP/StudioProjects/yecard/android/app/.cxx/Debug/4465sq72/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/HP/StudioProjects/yecard/android/app/.cxx/Debug/4465sq72/arm64-v8a/CMakeFiles/rebuild_cache.dir
