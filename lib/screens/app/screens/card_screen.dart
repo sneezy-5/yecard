@@ -206,7 +206,9 @@ class _CardScreenState extends State<CardScreen> {
                 ),
                 title: Text('Notification'),
                 onTap: () {
-                  Navigator.pop(context);
+                  //Navigator.pop(context);
+                  Navigator.of(context)
+                      .pushNamed('/app/notification');
                 },
               ),
               SizedBox(height: 10),

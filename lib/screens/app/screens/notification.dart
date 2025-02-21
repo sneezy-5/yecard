@@ -1,7 +1,7 @@
-/*
+
 import 'package:flutter/material.dart';
-import 'package:badges/badges.dart';
 import 'package:web_socket_channel/io.dart';
+import 'package:badges/badges.dart' as badges;
 
 class NotificationWidget extends StatefulWidget {
   @override
@@ -9,7 +9,7 @@ class NotificationWidget extends StatefulWidget {
 }
 
 class _NotificationWidgetState extends State<NotificationWidget> {
-  final _channel = IOWebSocketChannel.connect('wss://your-websocket-url');
+  final _channel = IOWebSocketChannel.connect('ws://194.163.184.208:8005');
   List<String> notifications = [];
   bool isLoading = true;
 
@@ -39,7 +39,7 @@ class _NotificationWidgetState extends State<NotificationWidget> {
       appBar: AppBar(
         title: Text('Notifications'),
         actions: [
-          Badge(
+          badges.Badge(
             badgeContent: Text(
               notifications.length.toString(),
               style: TextStyle(color: Colors.white),
@@ -72,7 +72,7 @@ class _NotificationWidgetState extends State<NotificationWidget> {
   }
 }
 
-void main() => runApp(MaterialApp(
-  home: NotificationWidget(),
-));
-*/
+
+
+
+

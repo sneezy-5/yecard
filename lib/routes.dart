@@ -5,6 +5,7 @@ import 'package:Yecard/screens/app/screens/add_portfolio.dart';
 import 'package:Yecard/screens/app/screens/card_order.dart';
 import 'package:Yecard/screens/app/screens/code_qr_screen.dart';
 import 'package:Yecard/screens/app/screens/contact_profile.dart';
+import 'package:Yecard/screens/app/screens/notification.dart';
 import 'package:Yecard/screens/app/screens/portfolio_details.dart';
 import 'package:Yecard/screens/app/screens/portfolio_details_add.dart';
 import 'package:Yecard/screens/app/screens/profile_screen.dart';
@@ -35,6 +36,7 @@ class AppRoutes {
   static const String appGetQrcode = '/app/qr_code_screen';
   static const String appAddContactProfile = '/app/add_contact_profile';
   static const String appContactProfile = '/app/contact_profile';
+  static const String appNotification = '/app/notification';
 
   static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -90,6 +92,8 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => QrCodeScannerScreen());
       case appGetOrder:
         return MaterialPageRoute(builder: (_) =>DeliveryScreen(),);
+      case appNotification:
+        return MaterialPageRoute(builder: (_) =>NotificationWidget(),);
 
       default:
         return MaterialPageRoute(
