@@ -1,0 +1,2 @@
+C:/Users/HP/Desktop/yecard/android/app/.cxx/RelWithDebInfo/2p2a5y33/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/HP/Desktop/yecard/android/app/.cxx/RelWithDebInfo/2p2a5y33/armeabi-v7a/CMakeFiles/rebuild_cache.dir

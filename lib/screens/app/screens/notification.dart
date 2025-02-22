@@ -1,7 +1,10 @@
-
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:web_socket_channel/io.dart';
-import 'package:badges/badges.dart' as badges;
+import 'dart:convert';
+
+import '../../../services/user_preference.dart';
+import '../../../widgets/popup_widgets.dart';
 
 class NotificationWidget extends StatefulWidget {
   @override
@@ -9,28 +12,117 @@ class NotificationWidget extends StatefulWidget {
 }
 
 class _NotificationWidgetState extends State<NotificationWidget> {
-  final _channel = IOWebSocketChannel.connect('ws://194.163.184.208:8005');
-  List<String> notifications = [];
+  IOWebSocketChannel? _channel;
+  List<dynamic> notifications = [];
   bool isLoading = true;
+  int unreadNotifCount = 0;
+  String? token;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
-    _fetchNotifications();
+    _fetchToken();
+  }
+
+  void _fetchToken() async {
+    token = await UserPreferences.getUserToken();
+    if (mounted) {
+      setState(() {
+        _channel = IOWebSocketChannel.connect(
+          'wss://yecard.pro/wss/notification/?token=$token',
+        );
+        _channel?.stream.listen(
+          _handleSocketMessage,
+          onError: (error) {
+            print("Error fetching notifications: $error");
+            if (mounted) {
+              setState(() {
+                isLoading = false;
+              });
+            }
+          },
+          onDone: () {
+            print("WebSocket closed. Reconnecting...");
+            _reconnectWebSocket();
+          },
+        );
+        _fetchNotifications();
+        _startGeneralNotificationService();
+      });
+    }
   }
 
   void _fetchNotifications() {
-    _channel.stream.listen((data) {
-      setState(() {
-        notifications.add(data);
-        isLoading = false;
-      });
-    }, onError: (error) {
-      print("Error fetching notifications: $error");
-      setState(() {
-        isLoading = false;
-      });
+    _channel?.sink.add(
+      '{"command": "get_general_notifications", "page_number": 1}',
+    );
+  }
+
+  void _fetchUnreadNotificationsCount() {
+    _channel?.sink.add(
+      '{"command": "get_unread_general_notifications_count"}',
+    );
+  }
+
+  void _startGeneralNotificationService() {
+    const interval = Duration(seconds: 4);
+    _timer = Timer.periodic(interval, (Timer timer) {
+      _fetchUnreadNotificationsCount();
+      _fetchNotifications();
     });
+  }
+
+  void _handleSocketMessage(dynamic message) {
+    final response = json.decode(message);
+    switch (response['general_msg_type']) {
+      case 4:
+        if (mounted) {
+          setState(() {
+            unreadNotifCount = response['count'];
+          });
+        }
+        break;
+      case 2:
+      case 1:
+      case 0:
+        if (mounted) {
+          setState(() {
+            if (response['notifications'] != null && response['notifications'] is List) {
+              notifications = response['notifications'];
+            } else {
+              notifications = [];
+            }
+            isLoading = false;
+          });
+        }
+        break;
+      default:
+        print('Unknown message type: $response');
+    }
+  }
+
+  void _reconnectWebSocket() {
+    Future.delayed(Duration(seconds: 4), () {
+      if (_channel?.sink != null) {
+        _channel?.sink.close();
+      }
+      _fetchToken();
+    });
+  }
+
+  void _setNotificationsAsRead() {
+    _channel?.sink.add(
+      '{"command": "mark_notifications_read"}',
+    );
+    _fetchUnreadNotificationsCount();
+  }
+
+  void _setNotificationAsOpen(int notifId) {
+    _channel?.sink.add(
+      '{"command": "mark_notifications_open", "notif_id": $notifId}',
+    );
+    _fetchNotifications();
   }
 
   @override
@@ -38,26 +130,37 @@ class _NotificationWidgetState extends State<NotificationWidget> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Notifications'),
-        actions: [
-          badges.Badge(
-            badgeContent: Text(
-              notifications.length.toString(),
-              style: TextStyle(color: Colors.white),
-            ),
-            child: Icon(Icons.notifications),
-          ),
-        ],
       ),
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : ListView.builder(
         itemCount: notifications.length,
         itemBuilder: (context, index) {
+          final notification = notifications[index];
           return Card(
             margin: EdgeInsets.all(10),
             child: ListTile(
-              title: Text(notifications[index]),
-              leading: Icon(Icons.notification_important),
+              leading: Image.network(notification['from']['image_url']),
+              title: Text(notification['verb']),
+              subtitle: Text(notification['natural_timestamp']),
+              onTap: () {
+                showDialog(
+                  barrierDismissible: false,
+                  context: context,
+                  builder: (BuildContext context) {
+                    return CustomPopup(
+                      title: 'Notification',
+                      content: notification['verb'],
+                      buttonText: 'ok',
+                      onButtonPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    );
+                  },
+                );
+                _setNotificationAsOpen(int.parse(notification['notification_id']));
+                _setNotificationsAsRead();
+              },
             ),
           );
         },
@@ -67,12 +170,8 @@ class _NotificationWidgetState extends State<NotificationWidget> {
 
   @override
   void dispose() {
-    _channel.sink.close();
+    _timer?.cancel();
+    _channel?.sink.close();
     super.dispose();
   }
 }
-
-
-
-
-

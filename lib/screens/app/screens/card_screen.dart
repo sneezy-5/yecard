@@ -1,9 +1,12 @@
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:badges/badges.dart' as badges;
+import 'package:web_socket_channel/io.dart';
 
 import '../../../bloc/profile_bloc.dart';
 import '../../../bloc/profile_event.dart';
@@ -23,6 +26,8 @@ class CardScreen extends StatefulWidget {
 }
 
 class _CardScreenState extends State<CardScreen> {
+  IOWebSocketChannel? _channel;
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final _nameController = TextEditingController();
@@ -35,6 +40,7 @@ class _CardScreenState extends State<CardScreen> {
   final _profileImageController = TextEditingController();
   late final PageController _pageController;
   final String appLink = 'https://play.google.com/store/apps/details?id=com.yecard.yecard';
+  int unreadNotifCount = 0;
 
   final CardRepository _cardRepository = CardRepository(CardService());
   final AnnonceService _annonceService = AnnonceService();
@@ -45,13 +51,14 @@ class _CardScreenState extends State<CardScreen> {
   late int id;
   List portfolioItems = [];
   List<String> annonceImages = [];
+  String? token;
 
   @override
   void initState() {
     super.initState();
+    _fetchToken();
     _fetchCardData();
     _fetchAnnonceData();
-    // Fetch profile data when the screen is loaded
     BlocProvider.of<ProfileBloc>(context).add(FetchProfile());
     _pageController = PageController();
 
@@ -68,6 +75,80 @@ class _CardScreenState extends State<CardScreen> {
     });
   }
 
+  void _fetchUnreadNotificationsCount() {
+    _channel?.sink.add(
+      '{"command": "get_unread_general_notifications_count"}',
+    );
+  }
+
+  void _setNotificationsAsRead() {
+    _channel?.sink.add(
+      '{"command": "mark_notifications_read"}',
+    );
+    _fetchUnreadNotificationsCount();
+  }
+
+  void _fetchToken() async {
+    token = await UserPreferences.getUserToken();
+    setState(() {
+      _channel = IOWebSocketChannel.connect(
+        'wss://yecard.pro/wss/notification/?token=$token',
+      );
+      _channel?.stream.listen(
+        _handleSocketMessage,
+        onError: (error) {
+          print("Error fetching notifications: $error");
+          setState(() {
+            isLoading = false;
+          });
+        },
+        onDone: () {
+          print("WebSocket closed. Reconnecting...");
+          _reconnectWebSocket();
+
+        },
+      );
+      _startGeneralNotificationService();
+    });
+  }
+
+  void _handleSocketMessage(dynamic message) {
+    final response = json.decode(message);
+
+    switch (response['general_msg_type']) {
+      case 4:
+        if (mounted) {
+          setState(() {
+            print("NOTIFICATION COUNT ${unreadNotifCount}");
+
+            unreadNotifCount = response['count'];
+            isLoading = false;
+
+          });
+        }
+        break;
+      case 2:
+      case 1:
+        break;
+      default:
+        print('Unknown message type: $response');
+    }
+  }
+
+  void _reconnectWebSocket() {
+    Future.delayed(Duration(seconds: 4), () {
+      if (_channel?.sink != null) {
+        _channel?.sink.close();
+      }
+      _fetchToken();
+    });
+  }
+  void _startGeneralNotificationService() {
+    const interval = Duration(seconds: 4);
+    _timer = Timer.periodic(interval, (Timer timer) {
+      _fetchUnreadNotificationsCount();
+    });
+  }
 
   Future<void> _fetchCardData() async {
     try {
@@ -200,17 +281,32 @@ class _CardScreenState extends State<CardScreen> {
               SizedBox(height: 50),
               ListTile(
                 leading: Container(
-                  width: 20,
-                  height: 20,
-                  child: Image.asset('assets/images/notif.png'),
+                  width: 60, // Adjust width to fit both the image and badge
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        width: 20,
+                        height: 20,
+                        child: badges.Badge(
+                          badgeContent: Text(
+                            unreadNotifCount.toString(),
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          child: Icon(Icons.notifications),
+                        ),
+                      ),
+
+                    ],
+                  ),
                 ),
                 title: Text('Notification'),
                 onTap: () {
-                  //Navigator.pop(context);
-                  Navigator.of(context)
-                      .pushNamed('/app/notification');
+                  _setNotificationsAsRead();
+                  Navigator.of(context).pushNamed('/app/notification');
                 },
               ),
+
               SizedBox(height: 10),
               ListTile(
                 leading: Container(
@@ -387,4 +483,13 @@ class _CardScreenState extends State<CardScreen> {
     _profileImageController.text = profileData.profile_image!;
     print(_profileImageController.text.toString());
   }
+
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    _channel?.sink.close();
+    super.dispose();
+  }
+
 }

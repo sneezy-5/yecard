@@ -1,0 +1,2 @@
+C:/Users/HP/Desktop/yecard/android/app/.cxx/RelWithDebInfo/2p2a5y33/x86/CMakeFiles/edit_cache.dir
+C:/Users/HP/Desktop/yecard/android/app/.cxx/RelWithDebInfo/2p2a5y33/x86/CMakeFiles/rebuild_cache.dir
