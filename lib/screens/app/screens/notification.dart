@@ -138,29 +138,14 @@ class _NotificationWidgetState extends State<NotificationWidget> {
         itemBuilder: (context, index) {
           final notification = notifications[index];
           return Card(
-            margin: EdgeInsets.all(10),
+            shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
+            margin: EdgeInsets.all(0),
             child: ListTile(
               leading: Image.network(notification['from']['image_url']),
               title: Text(notification['verb']),
               subtitle: Text(notification['natural_timestamp']),
-              onTap: () {
-                showDialog(
-                  barrierDismissible: false,
-                  context: context,
-                  builder: (BuildContext context) {
-                    return CustomPopup(
-                      title: 'Notification',
-                      content: notification['verb'],
-                      buttonText: 'ok',
-                      onButtonPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                    );
-                  },
-                );
-                _setNotificationAsOpen(int.parse(notification['notification_id']));
-                _setNotificationsAsRead();
-              },
             ),
           );
         },

@@ -317,7 +317,7 @@ class _CardScreenState extends State<CardScreen> {
                 title: Text("Partager l'application"),
                 onTap: () {
                   Share.share(
-                    'Découvrez cette application incroyable! Téléchargez-la ici: $appLink',
+                    'Découvrez mon porte-folio et toutes mes informations ! Téléchargez-la ici: $appLink',
                     subject: 'Mon code QR et lien de l\'application',
                   );
                 },

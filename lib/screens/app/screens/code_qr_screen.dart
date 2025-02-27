@@ -112,7 +112,7 @@ class _BusinessCardScreenState extends State<BusinessCardScreen> {
       onPressed: () {
         final String appLink = 'https://example.com/app-link';
         Share.share(
-          'Découvrez cette application incroyable! Téléchargez-la ici: $appLink',
+          'Découvrez mon porte-folio et toutes mes informations ! Téléchargez-la ici: $appLink',
           subject: 'Mon code QR et lien de l\'application',
         );
       },
